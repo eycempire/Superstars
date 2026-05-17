@@ -8,7 +8,7 @@ const CONFIG = {
 
   // ── Apps Script Web App URL ─────────────────────────────
   // Replace with your deployed Apps Script URL after deployment
-  API_URL: "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec",
+  API_URL: "https://script.google.com/macros/s/AKfycby5VOY0BdU7A2bBkJJv81rUqSue6utbdnNMLyfKgjEZsle8RAk9tCs427ObFOeBHwT6hQ/exec",
 
   // ── Google Drive Folders ────────────────────────────────
   DRIVE: {
