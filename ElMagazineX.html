@@ -1,0 +1,83 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"><title>El-Magazine X</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="../config.js"></script>
+<style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}:root{--gold:#FFD700;--purple:#A855F7;--dark:#0F0F1A;--dark2:#181825;--dark3:#222235;--border2:rgba(255,255,255,0.07);--text:#EEEEF5;--muted:#7777AA;--muted2:#AAAACC;--success:#10B981;--font-b:'Syne',sans-serif;--radius:14px}body{font-family:var(--font-b);background:var(--dark);color:var(--text);padding:16px 14px 32px}.x-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);border-radius:100px;padding:5px 14px;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#D8B4FE;margin-bottom:14px}.social-box{background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:12px 14px;font-size:12px;color:#93C5FD;margin-bottom:14px}.social-box strong{display:block;margin-bottom:4px;font-size:13px}.text-card{background:var(--dark2);border:1px solid var(--border2);border-radius:var(--radius);padding:18px;margin-bottom:16px}.text-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}.passage{font-size:15px;line-height:1.9;color:var(--text);font-weight:500}.step{display:flex;align-items:flex-start;gap:12px;background:var(--dark2);border:1px solid var(--border2);border-radius:var(--radius);padding:14px;margin-bottom:10px;transition:border-color .2s}.step.done{border-color:rgba(16,185,129,0.25)}.step-num{width:28px;height:28px;border-radius:50%;background:var(--dark3);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--muted);flex-shrink:0;transition:all .2s}.step.done .step-num{background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:#6EE7B7}.step-body{flex:1}.step-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px}.step-desc{font-size:12px;color:var(--muted);line-height:1.5}.recorder-wrap{background:var(--dark2);border:1px solid var(--border2);border-radius:var(--radius);padding:18px;text-align:center;margin-bottom:14px}.rec-status{font-size:12px;color:var(--muted);margin-bottom:12px}.rec-btn{width:68px;height:68px;border-radius:50%;border:none;cursor:pointer;font-size:26px;transition:all .2s;margin:0 auto;display:flex;align-items:center;justify-content:center}.rec-btn.idle{background:rgba(239,68,68,0.15);border:2px solid rgba(239,68,68,0.3);color:#FCA5A5}.rec-btn.idle:hover{background:rgba(239,68,68,0.25)}.rec-btn.recording{background:#EF4444;border:2px solid #FCA5A5;animation:rpulse 1s ease-in-out infinite;color:#fff}@keyframes rpulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)}50%{box-shadow:0 0 0 12px rgba(239,68,68,0)}}.rec-btn.done{background:rgba(16,185,129,0.15);border:2px solid rgba(16,185,129,0.3);color:#6EE7B7}.rec-hint{font-size:11px;color:var(--muted);margin-top:8px}.or-divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px;margin:12px 0}.or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:var(--border2)}.upload-area{border:2px dashed var(--border2);border-radius:var(--radius);padding:18px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px}.upload-area:hover{border-color:rgba(168,85,247,0.3)}.upload-area.has-file{border-color:rgba(16,185,129,0.3);border-style:solid;background:rgba(16,185,129,0.04)}.upload-icon{font-size:26px;margin-bottom:6px;display:block}.upload-text{font-size:12px;color:var(--muted2)}.upload-sub{font-size:10px;color:var(--muted);margin-top:3px}.pending-note{background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.18);border-radius:var(--radius);padding:12px 14px;font-size:12px;color:#93C5FD}.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;gap:16px}.spinner{width:36px;height:36px;border:3px solid rgba(168,85,247,0.2);border-top-color:var(--purple);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.loading-text{font-size:13px;color:var(--muted)}</style></head>
+<body><div id="root"><div class="loading"><div class="spinner"></div><div class="loading-text">Loading passage...</div></div></div>
+<script>
+const params=new URLSearchParams(window.location.search);
+const taskNumber=parseInt(params.get('task'))||1;
+const studentId=params.get('student')||'';
+let taskData=null,mediaRecorder=null,audioChunks=[],audioB64=null,isRecording=false,recTimer=null,recSeconds=0,step1Done=false;
+window.addEventListener('DOMContentLoaded',async()=>{
+  const r=await api('get_task_data',{student_id:studentId,activity_name:'ElMagazineX',task_number:taskNumber});
+  if(!r.success||!r.task){showError('Could not load task.');return;}
+  taskData=r.task;render();
+});
+function render(){
+  document.getElementById('root').innerHTML=`
+    <div class="x-badge">✨ El-Magazine X · Task ${taskNumber}</div>
+    <div class="social-box">
+      <strong>📱 Social Media EXB Program</strong>
+      If your recording is approved, it will be posted on our Facebook page. You earn tokens for every like and share it receives!
+    </div>
+    <div class="text-card">
+      <div class="text-label">Read this passage aloud</div>
+      <div class="passage">${taskData.Text_Content||'Text passage will appear here.'}</div>
+    </div>
+    <div class="step ${step1Done?'done':''}"><div class="step-num">${step1Done?'✓':'1'}</div><div class="step-body"><div class="step-title">Read & Practice</div><div class="step-desc">Read the passage above several times before recording.</div></div></div>
+    <div class="step ${audioB64?'done':''}"><div class="step-num">${audioB64?'✓':'2'}</div><div class="step-body"><div class="step-title">Record your voice</div><div class="step-desc">Speak clearly and confidently with good pronunciation.</div></div></div>
+    <div class="recorder-wrap">
+      <div class="rec-status">${audioB64?'✅ Recording ready!':'Press to start recording'}</div>
+      <button class="rec-btn ${audioB64?'done':isRecording?'recording':'idle'}" onclick="toggleRecording()">
+        ${audioB64?'✅':isRecording?'⏹':'🎙️'}
+      </button>
+      <div class="rec-hint">${audioB64?'Tap to re-record':'Tap to start'}</div>
+    </div>
+    <div class="or-divider">or upload audio file</div>
+    <div class="upload-area ${audioB64?'has-file':''}" onclick="document.getElementById('audioFile').click()">
+      <input type="file" id="audioFile" accept="audio/*" style="display:none" onchange="handleUpload(this)">
+      <span class="upload-icon">${audioB64?'✅':'📁'}</span>
+      <div class="upload-text">${audioB64?'Audio ready! Tap to replace.':'Upload audio file (MP3, WAV, M4A)'}</div>
+      <div class="upload-sub">Up to 20MB</div>
+    </div>
+    <div class="pending-note">📬 Your recording will be reviewed. If approved, it may be featured on our social media. EXB tokens added at end of season.</div>`;
+  if(!step1Done)setTimeout(()=>{step1Done=true;render();},4000);
+}
+async function toggleRecording(){
+  if(isRecording){stopRecording();}else{await startRecording();}
+}
+async function startRecording(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    audioChunks=[];
+    mediaRecorder=new MediaRecorder(stream);
+    mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
+    mediaRecorder.onstop=()=>{
+      audioB64=null;
+      const blob=new Blob(audioChunks,{type:'audio/webm'});
+      const reader=new FileReader();
+      reader.onload=e=>{audioB64=e.target.result;render();};
+      reader.readAsDataURL(blob);
+      stream.getTracks().forEach(t=>t.stop());
+    };
+    mediaRecorder.start();isRecording=true;render();
+  }catch(e){alert('Microphone access denied. Please upload an audio file instead.');}
+}
+function stopRecording(){
+  if(mediaRecorder&&mediaRecorder.state!=='inactive'){mediaRecorder.stop();}
+  isRecording=false;
+}
+function handleUpload(input){
+  const file=input.files[0];if(!file)return;
+  if(file.size>20*1024*1024){alert('File too large. Maximum 20MB.');return;}
+  const reader=new FileReader();
+  reader.onload=e=>{audioB64=e.target.result;render();};
+  reader.readAsDataURL(file);
+}
+window.getSubmitPayload=function(){
+  if(!audioB64)throw new Error('Please record or upload your audio first.');
+  return{audio_drive_url:audioB64,task_number:taskNumber};
+};
+window.getAnswers=function(){return window.getSubmitPayload();};
+function showError(msg){document.getElementById('root').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)">⚠️ ${msg}</div>`;}
+</script></body></html>

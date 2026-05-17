@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Grammar Activity</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold:    #FFD700; --gold2: #FFA500;
+  --dark:    #0F0F1A; --dark2: #181825; --dark3: #222235;
+  --border:  rgba(255,215,0,0.12); --border2: rgba(255,255,255,0.07);
+  --text:    #EEEEF5; --muted: #7777AA; --muted2: #AAAACC;
+  --success: #10B981; --error: #EF4444;
+  --font-b: 'Syne', sans-serif; --font-mono: 'JetBrains Mono', monospace;
+  --radius: 14px; --radius-sm: 8px;
+}
+body {
+  font-family: var(--font-b);
+  background: var(--dark);
+  color: var(--text);
+  padding: 20px 16px 32px;
+  min-height: 100vh;
+}
+
+/* Question counter */
+.q-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.q-count {
+  font-size: 11px; font-weight: 800;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+}
+.q-score {
+  display: flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono); font-size: 13px; color: var(--gold);
+}
+
+/* Question card */
+.q-card {
+  background: var(--dark2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: border-color .2s;
+  animation: slideIn .3s ease;
+}
+@keyframes slideIn {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.q-num {
+  font-size: 10px; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 10px;
+}
+.q-sentence {
+  font-size: 15px; line-height: 1.7; color: var(--text);
+  margin-bottom: 16px;
+}
+.q-blank {
+  display: inline-block;
+  min-width: 90px; height: 22px;
+  background: var(--dark3);
+  border-bottom: 2px solid var(--gold);
+  border-radius: 2px; margin: 0 3px;
+  vertical-align: middle;
+  transition: all .3s;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13px; color: var(--gold);
+  line-height: 22px;
+}
+.q-blank.filled { background: rgba(255,215,0,0.08); }
+
+/* Choices */
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.choice-btn {
+  padding: 11px 14px;
+  background: var(--dark3);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-b);
+  font-size: 13px; font-weight: 600;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all .2s;
+  text-align: left;
+  display: flex; align-items: center; gap: 8px;
+  position: relative; overflow: hidden;
+}
+.choice-btn:hover:not(.answered) {
+  border-color: rgba(255,215,0,0.3);
+  color: var(--text);
+  background: rgba(255,215,0,0.05);
+}
+.choice-btn.selected {
+  border-color: var(--gold);
+  background: rgba(255,215,0,0.08);
+  color: var(--gold);
+}
+.choice-btn.correct {
+  border-color: var(--success);
+  background: rgba(16,185,129,0.08);
+  color: #6EE7B7;
+}
+.choice-btn.wrong {
+  border-color: var(--error);
+  background: rgba(239,68,68,0.08);
+  color: #FCA5A5;
+}
+.choice-btn.dim { opacity: .4; pointer-events: none; }
+.choice-letter {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--dark2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800;
+  flex-shrink: 0;
+  transition: background .2s;
+}
+.choice-btn.correct .choice-letter { background: var(--success); color: #fff; }
+.choice-btn.wrong   .choice-letter { background: var(--error);   color: #fff; }
+.choice-btn.selected .choice-letter { background: var(--gold); color: var(--dark); }
+
+/* Result indicator per question */
+.q-result {
+  margin-top: 10px;
+  font-size: 12px; font-weight: 700;
+  display: none; align-items: center; gap: 6px;
+}
+.q-result.show { display: flex; }
+.q-result.ok  { color: #6EE7B7; }
+.q-result.bad { color: #FCA5A5; }
+
+/* Progress dots */
+.progress-dots {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.pdot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--dark3);
+  border: 1px solid var(--border2);
+  transition: all .3s;
+}
+.pdot.done-ok  { background: var(--success); border-color: var(--success); }
+.pdot.done-bad { background: var(--error);   border-color: var(--error); }
+.pdot.active   { background: var(--gold);    border-color: var(--gold); box-shadow: 0 0 6px var(--gold); }
+
+/* Score summary */
+.summary {
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+  display: none;
+  animation: slideIn .4s ease;
+  position: relative; overflow: hidden;
+}
+.summary::before {
+  content: '';
+  position: absolute; top:0; left:10%; right:10%; height:2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.summary-icon { font-size: 56px; margin-bottom: 12px; display: block; animation: pop .5s cubic-bezier(.34,1.56,.64,1); }
+@keyframes pop { from{transform:scale(0)} to{transform:scale(1)} }
+.summary-title {
+  font-family: 'Bebas Neue', var(--font-b);
+  font-size: 36px; letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.summary-title.win  { color: var(--gold); }
+.summary-title.lose { color: var(--muted2); }
+.summary-score {
+  font-family: var(--font-mono);
+  font-size: 48px; font-weight: 700; color: var(--gold); line-height: 1;
+  margin: 12px 0 4px;
+  animation: countUp .8s ease;
+}
+@keyframes countUp { from{opacity:0;transform:scale(.7)} to{opacity:1;transform:scale(1)} }
+.summary-label { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+.summary-breakdown {
+  display: flex; justify-content: center; gap: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border2);
+  margin-top: 4px;
+}
+.sb-item { text-align: center; }
+.sb-val  { font-family: var(--font-mono); font-size: 20px; font-weight: 700; display: block; }
+.sb-val.green { color: #6EE7B7; }
+.sb-val.red   { color: #FCA5A5; }
+.sb-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
+
+/* Loading state */
+.loading {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 300px; gap: 16px;
+}
+.spinner { width: 36px; height: 36px; border: 3px solid rgba(255,215,0,0.15); border-top-color: var(--gold); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.loading-text { font-size: 13px; color: var(--muted); }
+
+/* Error state */
+.error-state { text-align: center; padding: 40px 16px; color: var(--muted); }
+.error-state .ei { font-size: 40px; margin-bottom: 12px; display: block; }
+
+@media (max-width: 400px) {
+  .choices { grid-template-columns: 1fr; }
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div id="root">
+  <div class="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading task...</div>
+  </div>
+</div>
+
+<script src="../config.js"></script>
+<script>
+// ── Params ────────────────────────────────────────
+const params     = new URLSearchParams(window.location.search);
+const taskNumber = parseInt(params.get('task')) || 1;
+const studentId  = params.get('student') || '';
+
+// ── State ─────────────────────────────────────────
+let questions  = []; // [{sentence, choices:[{text,correct}]}]
+let answers    = []; // student's selected answers (index into choices)
+let answered   = []; // bool per question
+let taskData   = null;
+const LETTERS  = ['A','B','C','D'];
+
+// ── Load task from parent config ──────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  // Get task data from backend
+  const result = await api('get_task_data', {
+    student_id:    studentId,
+    activity_name: 'Grammar',
+    task_number:   taskNumber
+  });
+
+  if (!result.success || !result.task) {
+    showError('Could not load task. Please try again.');
+    return;
+  }
+
+  taskData = result.task;
+  buildQuestions();
+  render();
+});
+
+// ── Build questions from task data ────────────────
+function buildQuestions() {
+  // Task data has Q1..Q10 as correct answers + sentence data
+  // For display we need the sentences from the task assets (stored in Drive)
+  // Fallback: use placeholder structure and show correct answer from sheet
+  // In production, sentence + choices would be in the sheet row
+
+  // Parse task data — expected columns in Grammar sheet:
+  // Task_ID, Season_ID, Task_Number, Q1..Q10
+  // Each Q# = correct answer word
+  // The full sentence + wrong choices come from the activity JS asset
+  // For now we load from the sheet data embedded in task
+
+  questions = [];
+  for (let i = 1; i <= 10; i++) {
+    const correctAnswer = taskData['Q' + i] || '';
+    if (!correctAnswer) continue;
+
+    // Sentence and wrong choices should come from Drive asset
+    // Pattern: /Data/Grammar/{taskNumber}/{i}.json
+    // For MVP, we embed a placeholder sentence structure
+    // The admin fills these in the sheet with the sentence context
+    questions.push({
+      index:   i - 1,
+      correct: correctAnswer,
+      // These will be set from the Drive JSON asset
+      sentence: taskData['Sentence_' + i] || `Complete the sentence correctly. (Q${i})`,
+      choices:  shuffleChoices([
+        { text: correctAnswer, correct: true },
+        { text: taskData['Wrong_' + i + '_A'] || 'Option B', correct: false },
+        { text: taskData['Wrong_' + i + '_B'] || 'Option C', correct: false },
+        { text: taskData['Wrong_' + i + '_C'] || 'Option D', correct: false }
+      ])
+    });
+  }
+
+  answers  = new Array(questions.length).fill(null);
+  answered = new Array(questions.length).fill(false);
+}
+
+function shuffleChoices(arr) {
+  return arr.map(v => ({ v, sort: Math.random() }))
+            .sort((a, b) => a.sort - b.sort)
+            .map(({ v }) => v);
+}
+
+// ── Render ────────────────────────────────────────
+function render() {
+  const root = document.getElementById('root');
+
+  if (!questions.length) {
+    showError('No questions available for this task.');
+    return;
+  }
+
+  const doneCount = answered.filter(Boolean).length;
+  const allDone   = doneCount === questions.length;
+
+  root.innerHTML = `
+    <!-- Progress dots -->
+    <div class="q-header">
+      <div class="q-count">Grammar · Task ${taskNumber}</div>
+      <div class="q-score">⚡ ${countCorrect() * (CONFIG?.TOKENS?.Grammar / 10 || 4)} tokens</div>
+    </div>
+
+    <div class="progress-dots">
+      ${questions.map((q, i) => {
+        let cls = '';
+        if (answered[i]) cls = answers[i] !== null && questions[i].choices[answers[i]]?.correct ? 'done-ok' : 'done-bad';
+        else if (i === doneCount) cls = 'active';
+        return `<div class="pdot ${cls}" title="Q${i+1}"></div>`;
+      }).join('')}
+    </div>
+
+    <!-- Questions -->
+    ${questions.map((q, i) => renderQuestion(q, i)).join('')}
+
+    <!-- Summary (hidden until done) -->
+    <div class="summary" id="summary" style="${allDone ? 'display:block' : 'display:none'}">
+      ${renderSummary()}
+    </div>
+  `;
+}
+
+function renderQuestion(q, i) {
+  const isDone    = answered[i];
+  const selIdx    = answers[i];
+  const isCorrect = selIdx !== null && q.choices[selIdx]?.correct;
+
+  // Replace ___ in sentence with blank or filled value
+  const blankContent  = isDone ? (isCorrect ? q.correct : selIdx !== null ? q.choices[selIdx].text : q.correct) : '';
+  const blankClass    = isDone ? (isCorrect ? 'filled' : 'filled') : '';
+  const sentenceHTML  = q.sentence.includes('___')
+    ? q.sentence.replace('___', `<span class="q-blank ${blankClass}">${blankContent}</span>`)
+    : `${q.sentence} <span class="q-blank ${blankClass}">${blankContent}</span>`;
+
+  return `
+    <div class="q-card" id="qcard-${i}">
+      <div class="q-num">Question ${i + 1} of ${questions.length}</div>
+      <div class="q-sentence">${sentenceHTML}</div>
+      <div class="choices">
+        ${q.choices.map((c, ci) => {
+          let cls = '';
+          if (isDone) {
+            if (c.correct)            cls = 'correct answered';
+            else if (ci === selIdx)   cls = 'wrong answered';
+            else                      cls = 'dim answered';
+          } else if (ci === selIdx)   cls = 'selected';
+          return `
+            <button class="choice-btn ${cls}" onclick="selectChoice(${i}, ${ci})" ${isDone?'disabled':''}>
+              <div class="choice-letter">${LETTERS[ci]}</div>
+              ${c.text}
+            </button>`;
+        }).join('')}
+      </div>
+      <div class="q-result ${isDone ? 'show' : ''} ${isDone ? (isCorrect ? 'ok' : 'bad') : ''}">
+        ${isDone ? (isCorrect ? '✅ Correct!' : `❌ Correct answer: "${q.correct}"`) : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderSummary() {
+  const correct   = countCorrect();
+  const total     = questions.length;
+  const tokPerQ   = (CONFIG?.TOKENS?.Grammar || 40) / 10;
+  const tokens    = correct * tokPerQ;
+  const pct       = Math.round((correct / total) * 100);
+  const win       = correct >= total * 0.5;
+
+  return `
+    <span class="summary-icon">${win ? '🏆' : '💪'}</span>
+    <div class="summary-title ${win ? 'win' : 'lose'}">${win ? 'GREAT JOB!' : 'KEEP TRYING!'}</div>
+    <div class="summary-score">${Math.round(tokens)}</div>
+    <div class="summary-label">TOKENS EARNED</div>
+    <div class="summary-breakdown">
+      <div class="sb-item">
+        <span class="sb-val green">${correct}</span>
+        <div class="sb-lbl">Correct</div>
+      </div>
+      <div class="sb-item">
+        <span class="sb-val red">${total - correct}</span>
+        <div class="sb-lbl">Wrong</div>
+      </div>
+      <div class="sb-item">
+        <span class="sb-val">${pct}%</span>
+        <div class="sb-lbl">Score</div>
+      </div>
+    </div>
+  `;
+}
+
+// ── Interaction ────────────────────────────────────
+function selectChoice(qIdx, choiceIdx) {
+  if (answered[qIdx]) return;
+
+  answers[qIdx]  = choiceIdx;
+  answered[qIdx] = true;
+
+  // Animate card
+  const card = document.getElementById('qcard-' + qIdx);
+  if (card) {
+    card.style.borderColor = questions[qIdx].choices[choiceIdx].correct
+      ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.2)';
+  }
+
+  render();
+
+  // Auto-scroll to next question
+  const allDone = answered.filter(Boolean).length === questions.length;
+  if (!allDone) {
+    const nextIdx = answered.findIndex(a => !a);
+    setTimeout(() => {
+      const nextCard = document.getElementById('qcard-' + nextIdx);
+      if (nextCard) nextCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 400);
+  } else {
+    setTimeout(() => {
+      document.getElementById('summary')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 400);
+  }
+}
+
+function countCorrect() {
+  return questions.reduce((sum, q, i) => {
+    return sum + (answered[i] && answers[i] !== null && q.choices[answers[i]]?.correct ? 1 : 0);
+  }, 0);
+}
+
+// ── API exposed to parent (activity.html) ────────
+window.getAnswers = function() {
+  // Returns array of correct answer texts (or null)
+  return questions.map((q, i) => {
+    if (!answered[i] || answers[i] === null) return '';
+    return q.choices[answers[i]].text;
+  });
+};
+
+// ── Error ─────────────────────────────────────────
+function showError(msg) {
+  document.getElementById('root').innerHTML = `
+    <div class="error-state">
+      <span class="ei">⚠️</span>
+      <p>${msg}</p>
+    </div>`;
+}
+</script>
+</body>
+</html>

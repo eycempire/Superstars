@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join Superstars — EYC Empire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold:    #FFD700;
+    --gold2:   #FFA500;
+    --dark:    #0A0A0F;
+    --dark2:   #12121A;
+    --dark3:   #1C1C28;
+    --border:  rgba(255,215,0,0.15);
+    --text:    #F0F0F5;
+    --muted:   #888899;
+    --success: #10B981;
+    --error:   #EF4444;
+    --radius:  16px;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body:    'DM Sans', sans-serif;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,215,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,215,0,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* Glow orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    opacity: 0.4;
+  }
+  .orb-1 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(255,215,0,0.3), transparent);
+    top: -100px; right: -100px;
+    animation: float1 8s ease-in-out infinite;
+  }
+  .orb-2 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255,100,0,0.2), transparent);
+    bottom: -80px; left: -80px;
+    animation: float2 10s ease-in-out infinite;
+  }
+
+  @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-30px,20px)} }
+  @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,-30px)} }
+
+  /* Card */
+  .card {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 460px;
+    position: relative;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,215,0,0.05);
+  }
+
+  /* Top accent line */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 10%; right: 10%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    border-radius: 2px;
+  }
+
+  /* Logo */
+  .logo {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,215,0,0.08);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 100px;
+    padding: 6px 16px;
+    margin-bottom: 12px;
+  }
+  .logo-badge span { font-size: 11px; color: var(--gold); letter-spacing: .1em; text-transform: uppercase; font-weight: 600; }
+  .logo h1 {
+    font-family: var(--font-display);
+    font-size: 48px;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, var(--gold), var(--gold2), #fff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+  .logo p { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  /* Steps indicator */
+  .steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 32px;
+  }
+  .step-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+    border: 2px solid var(--dark3);
+    color: var(--muted);
+    background: var(--dark3);
+    transition: all .3s;
+    position: relative;
+    z-index: 1;
+  }
+  .step-dot.active {
+    border-color: var(--gold);
+    color: var(--dark);
+    background: var(--gold);
+  }
+  .step-dot.done {
+    border-color: var(--success);
+    color: var(--success);
+    background: rgba(16,185,129,0.1);
+  }
+  .step-line {
+    width: 48px; height: 2px;
+    background: var(--dark3);
+    transition: background .3s;
+  }
+  .step-line.done { background: var(--success); }
+
+  /* Form */
+  .form-group {
+    margin-bottom: 18px;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="file"] {
+    width: 100%;
+    background: var(--dark3);
+    border: 1.5px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    -webkit-appearance: none;
+  }
+  input:focus {
+    border-color: rgba(255,215,0,0.4);
+    box-shadow: 0 0 0 3px rgba(255,215,0,0.08);
+  }
+  input[type="file"] {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* Photo preview */
+  .photo-preview {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gold);
+    display: none;
+    margin: 12px auto 0;
+  }
+  .photo-note {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  /* Button */
+  .btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: var(--radius);
+    border: none;
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: var(--dark);
+  }
+  .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(255,215,0,0.3); }
+  .btn-gold:active { transform: translateY(0); }
+  .btn-ghost {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+  .btn-ghost:hover { border-color: rgba(255,215,0,0.3); color: var(--text); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+  /* Shimmer effect on btn */
+  .btn-gold::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: skewX(-20deg);
+    transition: left .5s;
+  }
+  .btn-gold:hover::after { left: 150%; }
+
+  /* Divider */
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 20px 0;
+    color: var(--muted); font-size: 12px;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1;
+    height: 1px; background: var(--border);
+  }
+
+  /* Login link */
+  .login-link {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 20px;
+  }
+  .login-link a {
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  /* Success card */
+  .success-card {
+    display: none;
+    text-align: center;
+  }
+  .success-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    display: block;
+    animation: pop .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes pop { from{transform:scale(0)} to{transform:scale(1)} }
+  .success-card h2 {
+    font-family: var(--font-display);
+    font-size: 36px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .success-card p { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+
+  .credentials-box {
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 24px;
+    text-align: left;
+  }
+  .cred-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .cred-row:last-child { border-bottom: none; }
+  .cred-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .cred-value {
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 3px;
+  }
+  .copy-btn {
+    background: rgba(255,215,0,0.1);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--gold);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .copy-btn:hover { background: rgba(255,215,0,0.2); }
+
+  .warning-box {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 12px;
+    color: #FCA5A5;
+    margin-bottom: 20px;
+    text-align: left;
+  }
+
+  /* Step panels */
+  .step-panel { display: none; }
+  .step-panel.active { display: block; }
+
+  /* Fade in */
+  .step-panel.active {
+    animation: fadeUp .3s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Age note */
+  .field-note {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    .card { padding: 28px 20px; }
+    .logo h1 { font-size: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="card">
+
+  <!-- LOGO -->
+  <div class="logo">
+    <div class="logo-badge">
+      <span>⭐ EYC Empire</span>
+    </div>
+    <h1>SUPERSTARS</h1>
+    <p>Your English journey starts here</p>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps" id="stepsBar">
+    <div class="step-dot active" id="dot1">1</div>
+    <div class="step-line" id="line1"></div>
+    <div class="step-dot" id="dot2">2</div>
+    <div class="step-line" id="line2"></div>
+    <div class="step-dot" id="dot3">3</div>
+  </div>
+
+  <!-- STEP 1 — Basic Info -->
+  <div class="step-panel active" id="step1">
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="fullName" placeholder="Enter your full name" maxlength="60">
+    </div>
+    <div class="form-group">
+      <label>Age</label>
+      <input type="number" id="age" placeholder="Your age" min="8" max="99">
+      <p class="field-note">You must have a Google account to join.</p>
+    </div>
+    <div class="form-group">
+      <label>Google Email</label>
+      <input type="email" id="email" placeholder="your@gmail.com">
+    </div>
+    <button class="btn btn-gold" onclick="goStep2()">CONTINUE →</button>
+  </div>
+
+  <!-- STEP 2 — Photo -->
+  <div class="step-panel" id="step2">
+    <div class="form-group" style="text-align:center">
+      <label style="text-align:center;display:block;">Profile Photo <span style="color:var(--muted);font-weight:400;text-transform:none;">(optional)</span></label>
+      <input type="file" id="photoInput" accept="image/*" onchange="previewPhoto(this)">
+      <img id="photoPreview" class="photo-preview" alt="preview">
+      <p class="photo-note">📋 All photos are reviewed by admins before being displayed. Please upload an appropriate photo.</p>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="goStep1()" style="flex:1">← BACK</button>
+      <button class="btn btn-gold" onclick="registerNow()" style="flex:2">JOIN NOW 🚀</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 — Success + Credentials -->
+  <div class="step-panel" id="step3">
+    <div class="success-card" id="successCard" style="display:block">
+      <span class="success-icon">🏆</span>
+      <h2>WELCOME!</h2>
+      <p>Your account has been created. Save your credentials — you'll need them to log in.</p>
+
+      <div class="warning-box">
+        ⚠️ <strong>Important:</strong> Screenshot or write down your Code and Passkey. They will not be shown again. You can recover them via email if needed.
+      </div>
+
+      <div class="credentials-box">
+        <div class="cred-row">
+          <div>
+            <div class="cred-label">Login Code</div>
+            <div class="cred-value" id="credCode">——</div>
+          </div>
+          <button class="copy-btn" onclick="copyText('credCode', this)">Copy</button>
+        </div>
+        <div class="cred-row">
+          <div>
+            <div class="cred-label">Passkey</div>
+            <div class="cred-value" id="credPasskey">——</div>
+          </div>
+          <button class="copy-btn" onclick="copyText('credPasskey', this)">Copy</button>
+        </div>
+        <div class="cred-row">
+          <div>
+            <div class="cred-label">Free Trial Ends</div>
+            <div class="cred-value" id="credTrial" style="font-size:14px;letter-spacing:1px;">——</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-gold" onclick="goToDashboard()">START COMPETING 🔥</button>
+    </div>
+  </div>
+
+  <!-- Login link -->
+  <div class="login-link" id="loginLinkRow">
+    Already have an account? <a href="login.html">Log In</a>
+  </div>
+
+</div>
+
+<script>
+  let photoBase64 = "";
+  let registeredStudent = null;
+
+  // ── Step navigation ──────────────────────────────────────
+  function showStep(n) {
+    [1,2,3].forEach(i => {
+      document.getElementById("step" + i).classList.toggle("active", i === n);
+      const dot = document.getElementById("dot" + i);
+      if (i < n)       { dot.className = "step-dot done"; dot.textContent = "✓"; }
+      else if (i === n){ dot.className = "step-dot active"; dot.textContent = i; }
+      else             { dot.className = "step-dot"; dot.textContent = i; }
+    });
+    if (document.getElementById("line1"))
+      document.getElementById("line1").className = "step-line" + (n > 1 ? " done" : "");
+    if (document.getElementById("line2"))
+      document.getElementById("line2").className = "step-line" + (n > 2 ? " done" : "");
+
+    document.getElementById("loginLinkRow").style.display = n === 3 ? "none" : "block";
+  }
+
+  function goStep1() { showStep(1); }
+
+  function goStep2() {
+    const name  = document.getElementById("fullName").value.trim();
+    const age   = document.getElementById("age").value;
+    const email = document.getElementById("email").value.trim();
+
+    if (!name)            return UI.toast("Please enter your full name.", "error");
+    if (!age || age < 8)  return UI.toast("Please enter a valid age.", "error");
+    if (!email || !email.includes("@")) return UI.toast("Please enter a valid email.", "error");
+
+    showStep(2);
+  }
+
+  function goStep1()  { showStep(1); }
+
+  function previewPhoto(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      UI.toast("Photo must be under 5MB.", "error");
+      input.value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      photoBase64 = e.target.result;
+      const preview = document.getElementById("photoPreview");
+      preview.src   = photoBase64;
+      preview.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function registerNow() {
+    const name  = document.getElementById("fullName").value.trim();
+    const age   = Number(document.getElementById("age").value);
+    const email = document.getElementById("email").value.trim();
+
+    UI.loader(true, "Creating your account...");
+
+    const result = await api("register", {
+      full_name: name,
+      age,
+      email,
+      photo_url: photoBase64 || ""
+    });
+
+    UI.loader(false);
+
+    if (!result.success) {
+      return UI.toast(result.error || "Registration failed. Try again.", "error");
+    }
+
+    registeredStudent = result;
+
+    // Save to local storage
+    Auth.save({
+      student_id:          result.student_id,
+      full_name:           name,
+      age,
+      email,
+      photo_url:           photoBase64 || "",
+      total_tokens:        0,
+      season_tokens:       0,
+      golden_tickets:      0,
+      subscription_status: "free",
+      ssr_status:          "none",
+      trial_active:        true,
+      trial_end:           result.trial_end
+    });
+
+    // Show credentials
+    document.getElementById("credCode").textContent    = result.code;
+    document.getElementById("credPasskey").textContent  = result.passkey;
+    document.getElementById("credTrial").textContent    =
+      new Date(result.trial_end).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
+
+    showStep(3);
+    document.getElementById("stepsBar").style.display = "none";
+  }
+
+  function copyText(elId, btn) {
+    const text = document.getElementById(elId).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = "✓ Copied";
+      setTimeout(() => btn.textContent = "Copy", 2000);
+    });
+  }
+
+  function goToDashboard() {
+    window.location.href = CONFIG.PAGES.DASHBOARD;
+  }
+</script>
+</body>
+</html>

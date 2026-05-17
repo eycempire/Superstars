@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Activity — Superstars</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold:    #FFD700;
+  --gold2:   #FFA500;
+  --gold-dim:rgba(255,215,0,0.1);
+  --dark:    #080810;
+  --dark2:   #0F0F1A;
+  --dark3:   #181825;
+  --dark4:   #222235;
+  --border:  rgba(255,215,0,0.12);
+  --border2: rgba(255,255,255,0.06);
+  --text:    #EEEEF5;
+  --muted:   #7777AA;
+  --muted2:  #AAAACC;
+  --success: #10B981;
+  --error:   #EF4444;
+  --info:    #3B82F6;
+  --font-d:  'Bebas Neue', sans-serif;
+  --font-b:  'Syne', sans-serif;
+  --font-mono:'JetBrains Mono', monospace;
+  --radius:  16px;
+  --radius-sm:10px;
+}
+
+body {
+  font-family: var(--font-b);
+  background: var(--dark);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.bg-grid {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,215,0,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,215,0,0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ── Top Bar ────────────────────────────────────────────── */
+.top-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 60px;
+  background: rgba(8,8,16,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 16px; gap: 12px;
+  z-index: 100;
+}
+.back-btn {
+  width: 36px; height: 36px;
+  background: var(--dark3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 18px;
+  transition: border-color .2s;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+.back-btn:hover { border-color: var(--border); }
+
+.bar-activity {
+  font-family: var(--font-d);
+  font-size: 22px; letter-spacing: 2px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.bar-task {
+  font-size: 12px; color: var(--muted);
+  font-weight: 600;
+}
+.bar-spacer { flex: 1; }
+.bar-tokens {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--dark3);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 5px 12px;
+  font-family: var(--font-mono);
+  font-size: 13px; color: var(--gold);
+  font-weight: 600;
+}
+.guide-btn {
+  width: 36px; height: 36px;
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 18px;
+  transition: all .2s; flex-shrink: 0;
+}
+.guide-btn:hover { background: rgba(59,130,246,0.2); }
+
+/* ── Layout ─────────────────────────────────────────────── */
+.page { padding-top: 60px; min-height: 100vh; position: relative; z-index: 1; }
+
+/* ── States ─────────────────────────────────────────────── */
+.state { display: none; }
+.state.active { display: block; animation: fadeUp .35s ease; }
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── Loading State ──────────────────────────────────────── */
+.loading-state {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: calc(100vh - 60px);
+  gap: 20px;
+}
+.spinner {
+  width: 48px; height: 48px;
+  border: 3px solid rgba(255,215,0,0.15);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 14px; color: var(--muted); }
+
+/* ── Countdown State ────────────────────────────────────── */
+.countdown-state {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: calc(100vh - 60px);
+  gap: 24px; text-align: center; padding: 24px;
+}
+.countdown-num {
+  font-family: var(--font-d);
+  font-size: 120px; line-height: 1;
+  color: var(--gold);
+  text-shadow: 0 0 60px rgba(255,215,0,0.4);
+  animation: countPop .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes countPop { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+.countdown-label {
+  font-family: var(--font-d);
+  font-size: 28px; letter-spacing: 3px; color: var(--muted2);
+}
+.countdown-hint { font-size: 13px; color: var(--muted); max-width: 300px; line-height: 1.6; }
+
+/* ── Task State ─────────────────────────────────────────── */
+.task-wrap {
+  max-width: 780px; margin: 0 auto;
+  padding: 24px 16px 100px;
+}
+
+/* Progress bar */
+.task-progress {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 20px;
+}
+.task-dots { display: flex; gap: 5px; flex: 1; }
+.tdot {
+  flex: 1; height: 4px; border-radius: 100px;
+  background: var(--dark4);
+  transition: background .3s;
+}
+.tdot.done  { background: var(--success); }
+.tdot.current { background: var(--gold); }
+.task-counter {
+  font-family: var(--font-mono);
+  font-size: 12px; color: var(--muted); white-space: nowrap;
+}
+
+/* Timer bar (for Label X) */
+.timer-wrap {
+  margin-bottom: 20px; display: none;
+}
+.timer-track {
+  height: 6px; background: var(--dark4);
+  border-radius: 100px; overflow: hidden;
+}
+.timer-fill {
+  height: 100%; border-radius: 100px;
+  background: linear-gradient(90deg, var(--success), var(--gold));
+  transition: width .1s linear, background .3s;
+}
+.timer-fill.danger { background: linear-gradient(90deg, var(--error), #FCA5A5); }
+.timer-count {
+  font-family: var(--font-mono);
+  font-size: 13px; color: var(--muted2);
+  text-align: right; margin-top: 6px;
+}
+.timer-count.danger { color: var(--error); }
+
+/* iFrame container */
+.iframe-wrap {
+  background: var(--dark2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 16px;
+  min-height: 400px;
+  position: relative;
+}
+.iframe-wrap iframe {
+  width: 100%; border: none;
+  display: block;
+  min-height: 400px;
+}
+
+/* Trial note */
+.trial-note {
+  background: rgba(255,215,0,0.05);
+  border: 1px solid rgba(255,215,0,0.15);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 12px; color: var(--gold);
+  margin-bottom: 16px;
+  display: none;
+}
+
+/* Submit bar */
+.submit-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  padding: 12px 16px;
+  background: rgba(8,8,16,0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex; gap: 10px; align-items: center;
+  z-index: 90;
+}
+.submit-btn {
+  flex: 1; padding: 14px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: var(--dark);
+  border: none; border-radius: var(--radius);
+  font-family: var(--font-d);
+  font-size: 20px; letter-spacing: 2px;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative; overflow: hidden;
+}
+.submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,215,0,0.3); }
+.submit-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.submit-btn::after {
+  content: ''; position: absolute;
+  top:0; left:-100%; width:60%; height:100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transform: skewX(-20deg); transition: left .5s;
+}
+.submit-btn:hover::after { left:150%; }
+
+.appeal-btn {
+  padding: 14px 16px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-family: var(--font-b);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .2s;
+  white-space: nowrap;
+}
+.appeal-btn:hover { border-color: var(--border); color: var(--text); }
+
+/* ── Result State ───────────────────────────────────────── */
+.result-state {
+  max-width: 500px; margin: 0 auto;
+  padding: 32px 16px 120px;
+  text-align: center;
+}
+.result-icon {
+  font-size: 80px; margin-bottom: 16px;
+  display: block;
+  animation: pop .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes pop { from{transform:scale(0)} to{transform:scale(1)} }
+
+.result-title {
+  font-family: var(--font-d);
+  font-size: 48px; letter-spacing: 3px;
+  margin-bottom: 8px;
+}
+.result-title.win  { color: var(--gold); }
+.result-title.zero { color: var(--muted2); }
+.result-title.ai   { color: var(--error); }
+
+.result-tokens {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin: 16px 0;
+}
+.result-tokens .big {
+  font-family: var(--font-mono);
+  font-size: 52px; font-weight: 700;
+  color: var(--gold);
+  animation: countUp 1s ease;
+}
+@keyframes countUp {
+  from { opacity:0; transform:translateY(20px) scale(.8); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+.result-tokens .label { font-size: 14px; color: var(--muted); }
+
+.result-sub { font-size: 14px; color: var(--muted2); line-height: 1.6; margin-bottom: 24px; }
+
+/* Breakdown */
+.result-breakdown {
+  background: var(--dark2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+.breakdown-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 13px;
+}
+.breakdown-row:last-child { border-bottom: none; }
+.breakdown-label { color: var(--muted2); }
+.breakdown-val   { font-family: var(--font-mono); font-weight: 600; color: var(--text); }
+.breakdown-val.gold  { color: var(--gold); }
+.breakdown-val.green { color: var(--success); }
+.breakdown-val.red   { color: var(--error); }
+
+/* Result actions */
+.result-actions { display: flex; flex-direction: column; gap: 10px; }
+.btn-gold {
+  padding: 15px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: var(--dark); border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-d);
+  font-size: 20px; letter-spacing: 2px;
+  cursor: pointer; transition: all .2s;
+}
+.btn-gold:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,215,0,0.3); }
+.btn-outline {
+  padding: 13px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  color: var(--muted2);
+  font-family: var(--font-b);
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all .2s;
+}
+.btn-outline:hover { border-color: var(--border); color: var(--text); }
+.btn-report {
+  padding: 13px;
+  background: rgba(168,85,247,0.1);
+  border: 1px solid rgba(168,85,247,0.2);
+  border-radius: var(--radius);
+  color: #D8B4FE;
+  font-family: var(--font-b);
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all .2s;
+}
+.btn-report:hover { background: rgba(168,85,247,0.2); }
+
+/* XP Float animation */
+.xp-float {
+  position: fixed;
+  font-family: var(--font-mono);
+  font-size: 20px; font-weight: 700;
+  color: var(--gold);
+  pointer-events: none;
+  z-index: 999;
+  text-shadow: 0 0 20px rgba(255,215,0,0.5);
+  animation: xpFloat 1.5s ease forwards;
+}
+@keyframes xpFloat {
+  0%   { opacity:1; transform:translateY(0) scale(1); }
+  100% { opacity:0; transform:translateY(-80px) scale(1.3); }
+}
+
+/* ── Guide Modal ────────────────────────────────────────── */
+.guide-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  align-items: flex-end;
+  justify-content: center;
+}
+.guide-overlay.show { display: flex; }
+.guide-sheet {
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px 40px;
+  width: 100%; max-width: 600px;
+  max-height: 80vh; overflow-y: auto;
+  animation: slideUp .3s cubic-bezier(.4,0,.2,1);
+}
+@keyframes slideUp {
+  from { transform:translateY(100%); }
+  to   { transform:translateY(0); }
+}
+.guide-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+}
+.guide-title {
+  font-family: var(--font-d);
+  font-size: 26px; letter-spacing: 2px; color: var(--gold);
+}
+.guide-close {
+  width: 32px; height: 32px;
+  background: var(--dark3);
+  border: 1px solid var(--border2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; color: var(--muted);
+}
+.guide-lang-toggle {
+  display: flex; gap: 6px; margin-bottom: 16px;
+}
+.lang-btn {
+  padding: 5px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted2);
+  font-family: var(--font-b);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all .2s;
+}
+.lang-btn.active {
+  background: var(--gold-dim);
+  border-color: var(--border);
+  color: var(--gold);
+}
+.guide-content {
+  font-size: 14px; color: var(--muted2);
+  line-height: 1.8;
+}
+.guide-content.ar { direction: rtl; text-align: right; font-size: 15px; }
+.guide-content h4 { color: var(--text); font-size: 14px; margin: 12px 0 6px; }
+.guide-content ul { padding-left: 20px; }
+.guide-content ul li { margin-bottom: 6px; }
+.guide-content .highlight {
+  background: var(--gold-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  color: var(--gold);
+  font-size: 13px; margin: 10px 0;
+}
+
+/* ── Appeal Modal ───────────────────────────────────────── */
+.appeal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  align-items: center; justify-content: center;
+  padding: 16px;
+}
+.appeal-overlay.show { display: flex; }
+.appeal-modal {
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 100%; max-width: 460px;
+  animation: fadeUp .3s ease;
+}
+.appeal-modal h3 {
+  font-family: var(--font-d);
+  font-size: 24px; letter-spacing: 2px;
+  color: var(--gold); margin-bottom: 8px;
+}
+.appeal-modal p { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
+.appeal-modal textarea {
+  width: 100%; background: var(--dark3);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  color: var(--text); font-family: var(--font-b);
+  font-size: 14px; resize: vertical; min-height: 100px;
+  outline: none; transition: border-color .2s;
+  margin-bottom: 14px;
+}
+.appeal-modal textarea:focus { border-color: rgba(255,215,0,0.3); }
+.appeal-btns { display: flex; gap: 10px; }
+.appeal-submit {
+  flex: 1; padding: 12px;
+  background: var(--gold); color: var(--dark);
+  border: none; border-radius: var(--radius-sm);
+  font-family: var(--font-d); font-size: 18px; letter-spacing: 1px;
+  cursor: pointer; transition: all .2s;
+}
+.appeal-cancel {
+  padding: 12px 16px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-family: var(--font-b); font-size: 13px;
+  cursor: pointer; transition: all .2s;
+}
+.appeal-cancel:hover { border-color: var(--border); color: var(--text); }
+
+/* ── Async pending state ────────────────────────────────── */
+.pending-state {
+  max-width: 460px; margin: 0 auto;
+  padding: 60px 16px; text-align: center;
+}
+.pending-icon { font-size: 72px; margin-bottom: 20px; display: block; }
+.pending-title {
+  font-family: var(--font-d);
+  font-size: 36px; letter-spacing: 2px;
+  color: var(--muted2); margin-bottom: 10px;
+}
+.pending-sub { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 28px; }
+
+/* Responsive */
+@media (max-width: 480px) {
+  .task-wrap { padding: 16px 12px 100px; }
+  .result-state { padding: 24px 12px 120px; }
+  .result-tokens .big { font-size: 44px; }
+  .countdown-num { font-size: 88px; }
+}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- ── TOP BAR ───────────────────────────────────────────── -->
+<div class="top-bar">
+  <a href="dashboard.html" class="back-btn" title="Back">←</a>
+  <div>
+    <div class="bar-activity" id="barActivity">—</div>
+    <div class="bar-task" id="barTask">Task —</div>
+  </div>
+  <div class="bar-spacer"></div>
+  <div class="bar-tokens">⚡ <span id="barTokens">—</span></div>
+  <div class="guide-btn" onclick="openGuide()" title="Activity Guide">❓</div>
+</div>
+
+<!-- ── PAGE ─────────────────────────────────────────────── -->
+<div class="page">
+
+  <!-- LOADING -->
+  <div class="state active" id="stateLoading">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">Loading task...</div>
+    </div>
+  </div>
+
+  <!-- COUNTDOWN (for Label X) -->
+  <div class="state" id="stateCountdown">
+    <div class="countdown-state">
+      <div class="countdown-num" id="countdownNum">3</div>
+      <div class="countdown-label">GET READY</div>
+      <div class="countdown-hint" id="countdownHint">Read each sentence and tap the incorrect word, then type the correction. You have 15 seconds per question.</div>
+    </div>
+  </div>
+
+  <!-- TASK -->
+  <div class="state" id="stateTask">
+    <div class="task-wrap">
+
+      <!-- Progress dots -->
+      <div class="task-progress">
+        <div class="task-dots" id="taskDots"></div>
+        <div class="task-counter" id="taskCounter">1 / 10</div>
+      </div>
+
+      <!-- Timer (Label X) -->
+      <div class="timer-wrap" id="timerWrap">
+        <div class="timer-track">
+          <div class="timer-fill" id="timerFill"></div>
+        </div>
+        <div class="timer-count" id="timerCount">15s</div>
+      </div>
+
+      <!-- Trial note -->
+      <div class="trial-note" id="trialNote">
+        ℹ️ Free Trial Mode — Your tokens are being added normally. Trial ends <span id="trialNoteDate">—</span>.
+      </div>
+
+      <!-- iFrame -->
+      <div class="iframe-wrap" id="iframeWrap">
+        <iframe id="taskFrame" title="Activity Task" scrolling="yes"></iframe>
+      </div>
+
+    </div>
+
+    <!-- Submit bar -->
+    <div class="submit-bar">
+      <button class="submit-btn" id="submitBtn" onclick="submitTask()">SUBMIT ⚡</button>
+      <button class="appeal-btn" id="appealBtn" onclick="openAppeal()" style="display:none">Appeal</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="state" id="stateResult">
+    <div class="result-state">
+      <span class="result-icon" id="resultIcon">🏆</span>
+      <div class="result-title" id="resultTitle">GREAT!</div>
+      <div class="result-tokens">
+        <div class="big" id="resultTokens">0</div>
+        <div class="label">TOKENS</div>
+      </div>
+      <div class="result-sub" id="resultSub">Keep going to climb the ranks!</div>
+
+      <div class="result-breakdown" id="resultBreakdown" style="display:none"></div>
+
+      <div class="result-actions">
+        <button class="btn-gold" onclick="nextTask()">NEXT TASK →</button>
+        <button class="btn-report" id="btnReport" onclick="viewReport()" style="display:none">📊 View Detailed Report (SSR)</button>
+        <button class="btn-outline" onclick="goToDashboard()">Back to Dashboard</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PENDING (async activities) -->
+  <div class="state" id="statePending">
+    <div class="pending-state">
+      <span class="pending-icon">📬</span>
+      <div class="pending-title">SUBMITTED!</div>
+      <div class="pending-sub" id="pendingSub">
+        Your submission is being processed. You'll receive your score in your Inbox shortly.
+      </div>
+      <button class="btn-gold" style="width:100%;margin-bottom:12px;" onclick="goToDashboard()">BACK TO DASHBOARD</button>
+      <button class="btn-outline" style="width:100%;" onclick="nextTask()">Next Task</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── GUIDE MODAL ────────────────────────────────────────── -->
+<div class="guide-overlay" id="guideOverlay" onclick="closeGuide(event)">
+  <div class="guide-sheet">
+    <div class="guide-header">
+      <div class="guide-title" id="guideTitle">GUIDE</div>
+      <div class="guide-close" onclick="closeGuide()">✕</div>
+    </div>
+    <div class="guide-lang-toggle">
+      <button class="lang-btn" onclick="setGuideLang('ar', this)">🇪🇬 عربي</button>
+      <button class="lang-btn active" onclick="setGuideLang('en', this)">🇬🇧 English</button>
+    </div>
+    <div class="guide-content" id="guideContent"></div>
+  </div>
+</div>
+
+<!-- ── APPEAL MODAL ───────────────────────────────────────── -->
+<div class="appeal-overlay" id="appealOverlay" onclick="closeAppeal(event)">
+  <div class="appeal-modal">
+    <h3>📋 APPEAL</h3>
+    <p>Think your score was calculated incorrectly? Submit an appeal and our team will review it within 24 hours.</p>
+    <textarea id="appealText" placeholder="Describe why you think your score should be different..."></textarea>
+    <div class="appeal-btns">
+      <button class="appeal-cancel" onclick="closeAppeal()">Cancel</button>
+      <button class="appeal-submit" onclick="submitAppeal()">SUBMIT</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCRIPTS ─────────────────────────────────────────────── -->
+<script>
+// ── State ────────────────────────────────────────────────
+let student      = null;
+let activityName = '';
+let taskNumber   = 1;
+let taskData     = null;
+let reportId     = null;
+let lastScore    = 0;
+let timerInterval= null;
+let timerSec     = 15;
+let guideLang    = 'en';
+
+// Typing tracking for AI detection
+let typingStart  = null;
+
+// ── URL Params ────────────────────────────────────────────
+const params = new URLSearchParams(window.location.search);
+activityName = params.get('activity') || 'Grammar';
+taskNumber   = parseInt(params.get('task')) || 1;
+
+// ── Guide content (AR + EN) per activity ──────────────────
+const GUIDES = {
+  Grammar: {
+    en: `<h4>How to play</h4>
+<ul>
+  <li>You will see <strong>10 sentences</strong>, each missing one word.</li>
+  <li>Choose the correct word from <strong>4 options</strong>.</li>
+  <li>Questions appear in random order each attempt.</li>
+</ul>
+<div class="highlight">⚡ Each correct answer = ${CONFIG.TOKENS.Grammar / 10} tokens. Partial scoring applies.</div>
+<h4>Tips</h4>
+<ul>
+  <li>Read the full sentence before choosing.</li>
+  <li>Think about the tense and grammar rule needed.</li>
+</ul>`,
+    ar: `<h4>كيف تلعب</h4>
+<ul>
+  <li>هتشوف <strong>١٠ جمل</strong>، كل جملة فيها كلمة ناقصة.</li>
+  <li>اختار الكلمة الصح من <strong>٤ اختيارات</strong>.</li>
+  <li>الأسئلة بتظهر بشكل عشوائي كل مرة.</li>
+</ul>
+<div class="highlight">⚡ كل إجابة صح = ${CONFIG.TOKENS.Grammar / 10} توكن. الدرجة جزئية.</div>
+<h4>نصايح</h4>
+<ul>
+  <li>اقرأ الجملة كاملة قبل ما تختار.</li>
+  <li>فكر في الزمن والقاعدة المطلوبة.</li>
+</ul>`
+  },
+  GrammarX: {
+    en: `<h4>How to play</h4>
+<ul>
+  <li>Read the text passage carefully.</li>
+  <li>Extract the <strong>required items</strong> (verbs, adjectives, etc.) in the input boxes.</li>
+  <li>Write <strong>one word per box</strong>.</li>
+</ul>
+<div class="highlight">⚠️ All 5 answers must be correct to earn tokens. Partial = 0 tokens.</div>
+<h4>Rules</h4>
+<ul>
+  <li>Spelling must be exact — even one wrong letter = wrong.</li>
+  <li>Uppercase/lowercase doesn't matter.</li>
+  <li>Write one word only per box.</li>
+</ul>`,
+    ar: `<h4>كيف تلعب</h4>
+<ul>
+  <li>اقرأ النص بعناية.</li>
+  <li>استخرج <strong>المطلوب</strong> (أفعال، صفات، إلخ) في الخانات.</li>
+  <li>اكتب <strong>كلمة واحدة في كل خانة</strong>.</li>
+</ul>
+<div class="highlight">⚠️ لازم الـ٥ إجابات كلها صح عشان تاخد التوكينز. غلطة = صفر.</div>
+<h4>قواعد</h4>
+<ul>
+  <li>الإملاء لازم يكون صح تماماً.</li>
+  <li>الحروف الكبيرة والصغيرة مش فارقة.</li>
+</ul>`
+  },
+  Seeds: {
+    en: `<h4>How to play</h4>
+<ul>
+  <li>You'll see <strong>6 words</strong> — 5 connected to a theme, 1 is the odd one out.</li>
+  <li>Write a story using <strong>ALL 6 words</strong>.</li>
+  <li>Minimum: <strong>120 words</strong> | Maximum: <strong>250 words</strong>.</li>
+</ul>
+<div class="highlight">📝 Word count is checked before submission — stay within the limit!</div>
+<h4>Scoring</h4>
+<ul>
+  <li><strong>Part A</strong>: All 6 words present = full Part A tokens.</li>
+  <li><strong>Part B</strong>: Content quality (vocabulary variety, connective words).</li>
+</ul>
+<h4>Important</h4>
+<ul>
+  <li>Do not use AI tools — detected submissions earn 0 tokens.</li>
+  <li>3 AI warnings = account suspension.</li>
+</ul>`,
+    ar: `<h4>كيف تلعب</h4>
+<ul>
+  <li>هتشوف <strong>٦ كلمات</strong> — ٥ مرتبطة بموضوع و١ خارجة.</li>
+  <li>اكتب قصة تشمل <strong>الكلمات الـ٦ كلها</strong>.</li>
+  <li>الحد الأدنى: <strong>١٢٠ كلمة</strong> | الحد الأقصى: <strong>٢٥٠ كلمة</strong>.</li>
+</ul>
+<div class="highlight">📝 عدد الكلمات بيتحسب قبل الإرسال — ابقى في الحدود!</div>
+<h4>الدرجات</h4>
+<ul>
+  <li><strong>الجزء أ</strong>: الكلمات الـ٦ موجودة = درجة كاملة الجزء أ.</li>
+  <li><strong>الجزء ب</strong>: جودة المحتوى (تنوع المفردات، كلمات الربط).</li>
+</ul>
+<h4>مهم</h4>
+<ul>
+  <li>لا تستخدم أدوات الذكاء الاصطناعي — بيترصد وبياخد صفر.</li>
+  <li>٣ تحذيرات = إيقاف الحساب.</li>
+</ul>`
+  },
+  Vivid: {
+    en: `<h4>How to play</h4>
+<ul>
+  <li>Look at the image carefully.</li>
+  <li>Write a detailed description in English.</li>
+  <li>Minimum: <strong>100 words</strong> | Maximum: <strong>250 words</strong>.</li>
+</ul>
+<div class="highlight">🎨 The more details you describe from the image, the higher your score!</div>
+<h4>Scoring</h4><ul><li>Your description is compared to a keyword bank from the image.</li><li>More keyword matches = more tokens.</li></ul>`,
+    ar: `<h4>كيف تلعب</h4>
+<ul>
+  <li>اتفرج على الصورة كويس.</li>
+  <li>اكتب وصف تفصيلي بالإنجليزي.</li>
+  <li>الحد الأدنى: <strong>١٠٠ كلمة</strong> | الحد الأقصى: <strong>٢٥٠ كلمة</strong>.</li>
+</ul>
+<div class="highlight">🎨 كل ما وصفت تفاصيل أكتر من الصورة، كل ما زادت درجتك!</div>`
+  },
+  Label: {
+    en: `<h4>How to play</h4>
+<ul>
+  <li>You'll see <strong>10 images</strong> of objects.</li>
+  <li>Write the English name of each object in the box below it.</li>
+</ul>
+<div class="highlight">💡 One correct word per image is enough — no need to write multiple words.</div>
+<h4>Rules</h4>
+<ul>
+  <li>Spelling must be exact.</li>
+  <li>Uppercase/lowercase doesn't matter.</li>
+  <li>Some objects have multiple accepted names (e.g. elevator / lift).</li>
+</ul>`,
+    ar: `<h4>كيف تلعب</h4>
+<ul>
+  <li>هتشوف <strong>١٠ صور</strong> لأشياء مختلفة.</li>
+  <li>اكتب اسم كل شيء بالإنجليزي في الخانة تحته.</li>
+</ul>
+<div class="highlight">💡 كلمة واحدة صح لكل صورة كافية — مش محتاج تكتب أكتر من كلمة.</div>
+<h4>قواعد</h4>
+<ul>
+  <li>الإملاء لازم يكون صح.</li>
+  <li>الحروف الكبيرة والصغيرة مش فارقة.</li>
+  <li>بعض الأشياء ليها أكتر من اسم مقبول.</li>
+</ul>`
+  },
+  LabelX: {
+    en: `<h4>How to play</h4>
+<ul>
+  <li>Each slide shows a sentence with <strong>one grammar mistake</strong>.</li>
+  <li><strong>Tap</strong> the incorrect word in the sentence.</li>
+  <li>Then <strong>type the correct word</strong> in the box.</li>
+  <li>You have <strong>15 seconds</strong> per question!</li>
+</ul>
+<div class="highlight">⏱️ A countdown will appear before the activity starts. Be ready!</div>
+<h4>Scoring</h4>
+<ul>
+  <li>Identifying the wrong word = 50% of the question tokens.</li>
+  <li>Correct fix = the other 50%.</li>
+  <li>No answer within 15 seconds = 0 tokens for that question.</li>
+</ul>`,
+    ar: `<h4>كيف تلعب</h4>
+<ul>
+  <li>كل سلايد فيه جملة فيها <strong>غلطة نحوية واحدة</strong>.</li>
+  <li><strong>اضغط</strong> على الكلمة الغلط في الجملة.</li>
+  <li>بعدين <strong>اكتب الكلمة الصح</strong> في الخانة.</li>
+  <li>عندك <strong>١٥ ثانية</strong> لكل سؤال!</li>
+</ul>
+<div class="highlight">⏱️ هيظهر كاونت داون قبل ما النشاط يبدأ. كن مستعداً!</div>
+<h4>الدرجات</h4>
+<ul>
+  <li>تحديد الكلمة الغلط = ٥٠٪ من درجة السؤال.</li>
+  <li>التصحيح الصح = الـ٥٠٪ الباقية.</li>
+  <li>مفيش إجابة في ١٥ ثانية = صفر لهذا السؤال.</li>
+</ul>`
+  },
+  GoldenEar: {
+    en: `<h4>How to play</h4>
+<ul>
+  <li>Listen to the audio clip — you can play, pause, and replay freely.</li>
+  <li>Answer <strong>10 questions</strong> based on what you heard.</li>
+  <li>Each question has <strong>4 choices</strong>.</li>
+</ul>
+<div class="highlight">👂 Listen carefully — details matter for full marks!</div>`,
+    ar: `<h4>كيف تلعب</h4>
+<ul>
+  <li>استمع للمقطع الصوتي — تقدر تشغله وتوقفه وترجعه بحرية.</li>
+  <li>أجب على <strong>١٠ أسئلة</strong> بناءً على اللي سمعته.</li>
+  <li>كل سؤال فيه <strong>٤ اختيارات</strong>.</li>
+</ul>
+<div class="highlight">👂 استمع كويس — التفاصيل مهمة عشان تاخد الدرجة كاملة!</div>`
+  },
+  Figurative: {
+    en: `<h4>How to play</h4>
+<ul>
+  <li>Read each dialogue (4 lines, 2 characters).</li>
+  <li>Find the <strong>figurative expression</strong> (highlighted).</li>
+  <li>Write an English sentence that has the <strong>same meaning</strong>.</li>
+</ul>
+<div class="highlight">💬 Example: "piece of cake" → write a sentence meaning "something very easy"</div>`,
+    ar: `<h4>كيف تلعب</h4>
+<ul>
+  <li>اقرأ كل حوار (٤ سطور، شخصين).</li>
+  <li>لاقي <strong>الجملة المجازية</strong> (المميزة).</li>
+  <li>اكتب جملة إنجليزي ليها <strong>نفس المعنى</strong>.</li>
+</ul>
+<div class="highlight">💬 مثال: "piece of cake" → اكتب جملة معناها "حاجة سهلة جداً"</div>`
+  },
+  Dictation: {
+    en: `<h4>How to play</h4>
+<ul>
+  <li>Listen to the audio clip — you can <strong>pause only</strong> (no rewind or fast-forward).</li>
+  <li>Write what you hear <strong>by hand</strong> on paper — clearly, without crossing out words.</li>
+  <li>Take a <strong>clear photo</strong> of your handwriting and upload it.</li>
+</ul>
+<div class="highlight">📸 Make sure your handwriting is clear and the photo is well-lit!</div>
+<h4>Important</h4>
+<ul>
+  <li>Your score will be sent to your Inbox (not immediate).</li>
+  <li>If rejected: unclear photo / bad handwriting / crossing out words.</li>
+  <li>You can retry rejected tasks.</li>
+</ul>`,
+    ar: `<h4>كيف تلعب</h4>
+<ul>
+  <li>استمع للمقطع الصوتي — تقدر <strong>توقف فقط</strong> (مش رجوع أو تقديم).</li>
+  <li>اكتب اللي سمعته <strong>بخطك</strong> على ورق — بوضوح وبدون تشطيب.</li>
+  <li>صور <strong>صورة واضحة</strong> للي كتبته وارفعها.</li>
+</ul>
+<div class="highlight">📸 خليك متأكد إن خطك واضح والإضاءة كويسة!</div>
+<h4>مهم</h4>
+<ul>
+  <li>درجتك هتوصلك في الانبوكس (مش فورية).</li>
+  <li>لو اترفضت: صورة مش واضحة / خط وحش / تشطيب.</li>
+  <li>تقدر تعيد المهام المرفوضة.</li>
+</ul>`
+  },
+  ElMagazine: {
+    en: `<h4>How to play</h4>
+<ul>
+  <li>Read the text passage carefully.</li>
+  <li>Record yourself reading it aloud — clearly and confidently.</li>
+  <li>Upload your audio recording.</li>
+</ul>
+<div class="highlight">🎙️ Your recording will be reviewed by our team. Score sent to Inbox.</div>`,
+    ar: `<h4>كيف تلعب</h4>
+<ul>
+  <li>اقرأ النص بعناية.</li>
+  <li>سجل نفسك وانت بتقراه — بوضوح وثقة.</li>
+  <li>ارفع التسجيل.</li>
+</ul>
+<div class="highlight">🎙️ التسجيل هيتراجعه فريقنا. الدرجة هتوصلك في الانبوكس.</div>`
+  },
+  SingSangSung: {
+    en: `<h4>How to play</h4>
+<ul>
+  <li>Read the Arabic song excerpt shown.</li>
+  <li>Translate it into English — minimum <strong>100 words</strong>.</li>
+  <li>Your translation is compared to a keyword bank.</li>
+</ul>
+<div class="highlight">🎵 Score sent to Inbox — translation quality takes time to process.</div>`,
+    ar: `<h4>كيف تلعب</h4>
+<ul>
+  <li>اقرأ مقطع الأغنية العربي اللي بيظهرلك.</li>
+  <li>ترجمه للإنجليزي — الحد الأدنى <strong>١٠٠ كلمة</strong>.</li>
+  <li>ترجمتك بتتقارن ببنك كلمات.</li>
+</ul>
+<div class="highlight">🎵 الدرجة بتوصل في الانبوكس — جودة الترجمة بتاخد وقت.</div>`
+  },
+  SingSangSungX: {
+    en: `<h4>How to play</h4>
+<ul>
+  <li>Listen to the English song excerpt with lyrics.</li>
+  <li>Record yourself <strong>singing</strong> the same excerpt — same rhythm and style.</li>
+  <li>Upload your audio.</li>
+</ul>
+<div class="highlight">📢 Your recording may be featured on our social media page (Facebook). You must agree before submitting.</div>
+<h4>EXB Social Media</h4>
+<ul>
+  <li>You earn extra tokens for every like and share your post receives!</li>
+  <li>EXB tokens are added at the end of the season.</li>
+</ul>`,
+    ar: `<h4>كيف تلعب</h4>
+<ul>
+  <li>استمع لمقطع الأغنية الإنجليزي مع الكلمات.</li>
+  <li>سجل نفسك <strong>بتغني</strong> نفس المقطع — بنفس الإيقاع والأسلوب.</li>
+  <li>ارفع التسجيل.</li>
+</ul>
+<div class="highlight">📢 ممكن تسجيلك يتنشر على صفحتنا على فيسبوك. لازم توافق قبل ما ترفع.</div>
+<h4>EXB سوشال ميديا</h4>
+<ul>
+  <li>بتاخد توكينز إضافية على كل لايك وشير على بوستك!</li>
+  <li>توكينز الـEXB بتضاف في آخر السيزون.</li>
+</ul>`
+  }
+};
+
+// Default guide for activities not listed
+const defaultGuide = {
+  en: `<h4>Activity Guide</h4><p>Follow the instructions shown in the task. Read carefully before submitting.</p><div class="highlight">⚡ Complete the task to earn tokens and climb the leaderboard!</div>`,
+  ar: `<h4>دليل النشاط</h4><p>اتبع التعليمات اللي بتظهر في المهمة. اقرأ كويس قبل ما ترسل.</p><div class="highlight">⚡ أكمل المهمة عشان تاخد توكينز وترفع في الرانك!</div>`
+};
+
+// ── Async activities (no immediate score) ─────────────────
+const ASYNC_ACTIVITIES = ['Dictation','DictationX','ElMagazine','ElMagazineX','SingSangSung','SingSangSungX'];
+
+// ── Init ──────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  student = Auth.require();
+  if (!student) return;
+
+  // Set bar info
+  document.getElementById('barActivity').textContent = CONFIG.ACTIVITY_NAMES[activityName] || activityName;
+  document.getElementById('barTask').textContent      = 'Task ' + taskNumber;
+  document.getElementById('barTokens').textContent    = CONFIG.TOKENS[activityName] || '—';
+
+  // Trial note
+  if (student.trial_active) {
+    document.getElementById('trialNote').style.display = 'block';
+    document.getElementById('trialNoteDate').textContent =
+      new Date(student.trial_end).toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+  }
+
+  // Load task data
+  await loadTask();
+});
+
+// ── Load Task ─────────────────────────────────────────────
+async function loadTask() {
+  showState('stateLoading');
+
+  const result = await api('get_task_data', {
+    student_id:    student.student_id,
+    activity_name: activityName,
+    task_number:   taskNumber
+  });
+
+  if (!result.success) {
+    if (result.error === 'subscription_required') {
+      UI.toast('Subscribe to access this activity! 🎫', 'warning');
+      setTimeout(() => window.location.href = 'shop.html', 1500);
+      return;
+    }
+    UI.toast(result.error || 'Failed to load task.', 'error');
+    setTimeout(() => window.location.href = 'dashboard.html', 2000);
+    return;
+  }
+
+  taskData = result.task;
+
+  // Label X needs countdown
+  if (activityName === 'LabelX') {
+    startCountdown();
+  } else {
+    loadTaskFrame();
+  }
+}
+
+// ── Countdown (Label X) ───────────────────────────────────
+function startCountdown() {
+  showState('stateCountdown');
+  let count = 3;
+  document.getElementById('countdownNum').textContent = count;
+
+  const interval = setInterval(() => {
+    count--;
+    if (count <= 0) {
+      clearInterval(interval);
+      loadTaskFrame();
+    } else {
+      const el = document.getElementById('countdownNum');
+      el.textContent = count;
+      el.style.animation = 'none';
+      el.offsetHeight; // reflow
+      el.style.animation = 'countPop .5s cubic-bezier(.34,1.56,.64,1)';
+    }
+  }, 1000);
+}
+
+// ── Load iFrame ───────────────────────────────────────────
+function loadTaskFrame() {
+  showState('stateTask');
+
+  // Show task progress dots (placeholder: 10 tasks)
+  renderProgressDots();
+
+  // Show timer for Label X
+  if (activityName === 'LabelX') {
+    document.getElementById('timerWrap').style.display = 'block';
+    startSlideTimer();
+  }
+
+  // Load iFrame with task JS file
+  const frame = document.getElementById('taskFrame');
+  const src   = `activities/${activityName}.html?task=${taskNumber}&student=${student.student_id}`;
+  frame.src   = src;
+
+  // Auto-resize iframe
+  frame.onload = () => {
+    try {
+      const h = frame.contentWindow.document.body.scrollHeight;
+      frame.style.height = Math.max(h, 400) + 'px';
+    } catch(e) {
+      frame.style.height = '500px';
+    }
+  };
+
+  // Start typing timer
+  typingStart = Date.now();
+}
+
+function renderProgressDots() {
+  const dots = document.getElementById('taskDots');
+  dots.innerHTML = '';
+  for (let i = 1; i <= 10; i++) {
+    const d = document.createElement('div');
+    d.className = 'tdot' + (i < taskNumber ? ' done' : i === taskNumber ? ' current' : '');
+    dots.appendChild(d);
+  }
+  document.getElementById('taskCounter').textContent = taskNumber + ' / 10';
+}
+
+// ── Slide Timer (Label X) ─────────────────────────────────
+let currentSlide   = 1;
+let totalSlides    = 10;
+let slideAnswers   = [];
+
+function startSlideTimer() {
+  timerSec = 15;
+  updateTimer();
+  timerInterval = setInterval(() => {
+    timerSec--;
+    updateTimer();
+    if (timerSec <= 0) {
+      clearInterval(timerInterval);
+      // Auto-submit current slide as timed out
+      collectSlideAnswer(true);
+    }
+  }, 1000);
+}
+
+function updateTimer() {
+  const fill  = document.getElementById('timerFill');
+  const count = document.getElementById('timerCount');
+  const pct   = (timerSec / 15) * 100;
+  fill.style.width = pct + '%';
+  fill.className   = 'timer-fill' + (timerSec <= 5 ? ' danger' : '');
+  count.textContent = timerSec + 's';
+  count.className   = 'timer-count' + (timerSec <= 5 ? ' danger' : '');
+}
+
+function collectSlideAnswer(timedOut = false) {
+  // Get answer from iFrame
+  let ans = { selected_word: '', correction: '', timed_out: timedOut };
+  try {
+    const fw = document.getElementById('taskFrame').contentWindow;
+    if (fw.getCurrentAnswer) ans = { ...fw.getCurrentAnswer(), timed_out: timedOut };
+  } catch(e) {}
+  slideAnswers.push(ans);
+
+  if (slideAnswers.length < totalSlides) {
+    currentSlide++;
+    // Tell iframe to advance slide
+    try {
+      document.getElementById('taskFrame').contentWindow.nextSlide && 
+      document.getElementById('taskFrame').contentWindow.nextSlide();
+    } catch(e) {}
+    // Restart timer with 1s delay
+    setTimeout(() => {
+      timerSec = 15;
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timerSec--;
+        updateTimer();
+        if (timerSec <= 0) {
+          clearInterval(timerInterval);
+          collectSlideAnswer(true);
+        }
+      }, 1000);
+      updateTimer();
+    }, 1000);
+  } else {
+    // All slides done — submit
+    doSubmitLabelX();
+  }
+}
+
+// ── Submit ────────────────────────────────────────────────
+async function submitTask() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled    = true;
+  btn.textContent = 'SUBMITTING...';
+
+  // Label X uses slide system
+  if (activityName === 'LabelX') {
+    clearInterval(timerInterval);
+    collectSlideAnswer(false);
+    return;
+  }
+
+  // Async activities
+  if (ASYNC_ACTIVITIES.includes(activityName)) {
+    await submitAsync();
+    return;
+  }
+
+  // Get answers from iFrame
+  let answers = null;
+  try {
+    const fw = document.getElementById('taskFrame').contentWindow;
+    if (fw.getAnswers) {
+      answers = fw.getAnswers();
+    } else {
+      UI.toast('Could not collect answers from task.', 'error');
+      btn.disabled    = false;
+      btn.textContent = 'SUBMIT ⚡';
+      return;
+    }
+  } catch(e) {
+    UI.toast('Error collecting answers. Please try again.', 'error');
+    btn.disabled    = false;
+    btn.textContent = 'SUBMIT ⚡';
+    return;
+  }
+
+  const typingDuration = typingStart ? Date.now() - typingStart : 999999;
+  const action = 'submit_' + activityName.toLowerCase();
+
+  UI.loader(true, 'Calculating score...');
+
+  const result = await api(action, {
+    student_id:         student.student_id,
+    task_number:        taskNumber,
+    answers,
+    typing_duration_ms: typingDuration
+  });
+
+  UI.loader(false);
+  btn.disabled    = false;
+  btn.textContent = 'SUBMIT ⚡';
+
+  if (!result.success) {
+    UI.toast(result.error || 'Submission failed.', 'error');
+    return;
+  }
+
+  if (result.ai_detected) {
+    showResult({
+      tokens:   0,
+      title:    'AI DETECTED',
+      type:     'ai',
+      icon:     '🤖',
+      sub:      'AI-generated content was detected. You earned 0 tokens. Warning issued.',
+      breakdown:null,
+      reportId: null
+    });
+    return;
+  }
+
+  reportId = result.report_id;
+  showResult({
+    tokens:   result.tokens_earned || 0,
+    title:    result.tokens_earned > 0 ? 'GREAT!' : 'KEEP TRYING!',
+    type:     result.tokens_earned > 0 ? 'win' : 'zero',
+    icon:     result.tokens_earned > 0 ? '🏆' : '💪',
+    sub:      buildSubText(result),
+    breakdown:buildBreakdown(result),
+    reportId: result.report_id
+  });
+}
+
+async function doSubmitLabelX() {
+  UI.loader(true, 'Calculating score...');
+
+  const result = await api('submit_labelx', {
+    student_id:  student.student_id,
+    task_number: taskNumber,
+    answers:     slideAnswers
+  });
+
+  UI.loader(false);
+
+  if (!result.success) {
+    UI.toast(result.error || 'Submission failed.', 'error');
+    return;
+  }
+
+  reportId = result.report_id;
+  showResult({
+    tokens:   result.tokens_earned || 0,
+    title:    result.tokens_earned > 0 ? 'GREAT!' : 'KEEP TRYING!',
+    type:     result.tokens_earned > 0 ? 'win' : 'zero',
+    icon:     result.tokens_earned > 0 ? '🏆' : '💪',
+    sub:      'You earned ' + result.tokens_earned + ' / ' + CONFIG.TOKENS.LabelX + ' tokens.',
+    breakdown:null,
+    reportId: result.report_id
+  });
+}
+
+async function submitAsync() {
+  // Get file from iFrame
+  let payload = {};
+  try {
+    const fw = document.getElementById('taskFrame').contentWindow;
+    if (fw.getSubmitPayload) payload = fw.getSubmitPayload();
+  } catch(e) {}
+
+  const action = 'submit_' + activityName.toLowerCase().replace('x','') + (activityName.endsWith('X') ? 'x' : '');
+
+  UI.loader(true, 'Uploading...');
+
+  const result = await api(action, {
+    student_id:  student.student_id,
+    task_number: taskNumber,
+    ...payload
+  });
+
+  UI.loader(false);
+
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled    = false;
+  submitBtn.textContent = 'SUBMIT ⚡';
+
+  if (!result.success) {
+    UI.toast(result.error || 'Submission failed.', 'error');
+    return;
+  }
+
+  showState('statePending');
+  const msgs = {
+    Dictation:    "Your handwritten submission is being processed via OCR. Score coming soon!",
+    DictationX:   "Your handwritten submission is being processed via OCR. Score coming soon!",
+    ElMagazine:   "Your recording has been submitted for admin review. Score coming to your Inbox!",
+    ElMagazineX:  "Your recording has been submitted. If featured on social media, EXB tokens will be added at season end!",
+    SingSangSung: "Your translation is being processed. This may take a little time. Check your Inbox!",
+    SingSangSungX:"Your singing recording has been submitted. Watch your Inbox for approval and social media EXB!"
+  };
+  document.getElementById('pendingSub').textContent = msgs[activityName] || "Your submission is under review. Check your Inbox.";
+}
+
+// ── Result helpers ────────────────────────────────────────
+function buildSubText(result) {
+  if (activityName === 'Grammar' || activityName === 'GoldenEar' || activityName === 'Alike' || activityName === 'Label' || activityName === 'Figurative') {
+    return `${result.correct || 0} / ${result.total || 10} correct — ${result.tokens_earned} / ${CONFIG.TOKENS[activityName]} tokens`;
+  }
+  if (activityName === 'Seeds' || activityName === 'SeedsX') {
+    return `Keywords: ${result.keywords_found}/${result.keywords_total} | Content quality: ${result.quality_score}%`;
+  }
+  if (activityName === 'Vivid' || activityName === 'VividX') {
+    return `Matched ${result.keywords_matched} / ${result.keywords_total} keywords (${result.match_pct}%)`;
+  }
+  if (activityName === 'GrammarX') {
+    return result.all_correct ? 'All answers correct!' : 'One or more answers were incorrect.';
+  }
+  return `You earned ${result.tokens_earned} / ${CONFIG.TOKENS[activityName]} tokens.`;
+}
+
+function buildBreakdown(result) {
+  if (activityName === 'Seeds' || activityName === 'SeedsX') {
+    return [
+      { label: 'Keywords Part (A)',  val: result.part_a + ' tokens', cls: 'gold' },
+      { label: 'Content Part (B)',   val: result.part_b + ' tokens', cls: 'gold' },
+      { label: 'Content Quality',    val: result.quality_score + '%', cls: '' },
+      { label: 'Keywords Found',     val: result.keywords_found + ' / ' + result.keywords_total, cls: result.keywords_found === result.keywords_total ? 'green' : 'red' }
+    ];
+  }
+  if (activityName === 'Vivid' || activityName === 'VividX') {
+    return [
+      { label: 'Keywords Matched', val: result.keywords_matched + ' / ' + result.keywords_total, cls: 'gold' },
+      { label: 'Match %',          val: result.match_pct + '%', cls: '' }
+    ];
+  }
+  return null;
+}
+
+function showResult(data) {
+  lastScore = data.tokens;
+  reportId  = data.reportId;
+
+  document.getElementById('resultIcon').textContent  = data.icon;
+  document.getElementById('resultTitle').textContent = data.title;
+  document.getElementById('resultTitle').className   = 'result-title ' + data.type;
+  document.getElementById('resultSub').textContent   = data.sub;
+
+  // Animate token count
+  const tokenEl = document.getElementById('resultTokens');
+  let count = 0;
+  const target = data.tokens;
+  const step   = Math.max(1, Math.floor(target / 30));
+  const timer  = setInterval(() => {
+    count = Math.min(count + step, target);
+    tokenEl.textContent = count;
+    if (count >= target) clearInterval(timer);
+  }, 30);
+
+  // Breakdown
+  const bd = document.getElementById('resultBreakdown');
+  if (data.breakdown) {
+    bd.style.display = 'block';
+    bd.innerHTML = '<div class="card-title" style="margin-bottom:10px">Breakdown</div>' +
+      data.breakdown.map(r =>
+        `<div class="breakdown-row">
+          <span class="breakdown-label">${r.label}</span>
+          <span class="breakdown-val ${r.cls}">${r.val}</span>
+        </div>`
+      ).join('');
+  } else {
+    bd.style.display = 'none';
+  }
+
+  // SSR report button
+  const btnReport = document.getElementById('btnReport');
+  if (reportId && student.ssr_status === 'active') {
+    btnReport.style.display = 'block';
+  } else {
+    btnReport.style.display = 'none';
+  }
+
+  // Appeal button in submit bar
+  if (reportId) {
+    document.getElementById('appealBtn').style.display = 'block';
+  }
+
+  // XP Float animation
+  if (data.tokens > 0) {
+    spawnXPFloat(data.tokens);
+  }
+
+  // Update student tokens in memory
+  student.total_tokens  = (student.total_tokens  || 0) + data.tokens;
+  student.season_tokens = (student.season_tokens || 0) + data.tokens;
+  Auth.save(student);
+
+  showState('stateResult');
+}
+
+function spawnXPFloat(tokens) {
+  const el = document.createElement('div');
+  el.className   = 'xp-float';
+  el.textContent = '+' + tokens + ' ⚡';
+  el.style.left  = '50%';
+  el.style.top   = '50%';
+  el.style.transform = 'translateX(-50%)';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1600);
+}
+
+// ── Navigation ────────────────────────────────────────────
+function nextTask() {
+  if (taskNumber < 10) {
+    window.location.href = `activity.html?activity=${activityName}&task=${taskNumber + 1}`;
+  } else {
+    UI.toast('🎉 All tasks for this activity are done!', 'success');
+    setTimeout(() => window.location.href = 'dashboard.html', 1500);
+  }
+}
+
+function goToDashboard() {
+  window.location.href = 'dashboard.html';
+}
+
+// ── State Manager ─────────────────────────────────────────
+function showState(id) {
+  document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── Guide ─────────────────────────────────────────────────
+function openGuide() {
+  document.getElementById('guideTitle').textContent =
+    CONFIG.ACTIVITY_NAMES[activityName] + ' — Guide';
+  setGuideLang('ar', document.querySelector('.lang-btn'));
+  document.getElementById('guideOverlay').classList.add('show');
+}
+
+function closeGuide(e) {
+  if (!e || e.target === document.getElementById('guideOverlay')) {
+    document.getElementById('guideOverlay').classList.remove('show');
+  }
+}
+
+function setGuideLang(lang, btn) {
+  guideLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const content  = document.getElementById('guideContent');
+  const guide    = GUIDES[activityName] || defaultGuide;
+  content.innerHTML  = guide[lang] || guide['en'];
+  content.className  = 'guide-content' + (lang === 'ar' ? ' ar' : '');
+}
+
+// ── Appeal ────────────────────────────────────────────────
+function openAppeal() {
+  document.getElementById('appealOverlay').classList.add('show');
+}
+
+function closeAppeal(e) {
+  if (!e || e.target === document.getElementById('appealOverlay')) {
+    document.getElementById('appealOverlay').classList.remove('show');
+  }
+}
+
+async function submitAppeal() {
+  const msg = document.getElementById('appealText').value.trim();
+  if (!msg) return UI.toast('Please describe your appeal.', 'error');
+  if (!reportId) return UI.toast('No report found to appeal.', 'error');
+
+  UI.loader(true, 'Submitting appeal...');
+  const result = await api('submit_appeal', {
+    student_id:    student.student_id,
+    activity_name: activityName,
+    task_number:   taskNumber,
+    report_id:     reportId,
+    message:       msg
+  });
+  UI.loader(false);
+
+  if (result.success) {
+    UI.toast('Appeal submitted! Ref: #' + result.appeal_id, 'success');
+    document.getElementById('appealOverlay').classList.remove('show');
+  } else {
+    UI.toast(result.error || 'Failed to submit appeal.', 'error');
+  }
+}
+
+// ── SSR Report ────────────────────────────────────────────
+function viewReport() {
+  if (!reportId) return UI.toast('No report available.', 'info');
+  // In future: open report modal
+  UI.toast('Report feature coming soon in SSR panel!', 'info');
+}
+</script>
+</body>
+</html>

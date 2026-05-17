@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"><title>Dictation X</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="../config.js"></script>
+<style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}:root{--gold:#FFD700;--purple:#A855F7;--dark:#0F0F1A;--dark2:#181825;--dark3:#222235;--border2:rgba(255,255,255,0.07);--text:#EEEEF5;--muted:#7777AA;--muted2:#AAAACC;--success:#10B981;--error:#EF4444;--font-b:'Syne',sans-serif;--radius:14px}body{font-family:var(--font-b);background:var(--dark);color:var(--text);padding:16px 14px 32px}.x-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);border-radius:100px;padding:5px 14px;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#D8B4FE;margin-bottom:14px}.warn-box{background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:10px 14px;font-size:12px;color:#FCD34D;margin-bottom:14px}.exb-box{background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:10px 14px;font-size:12px;color:#6EE7B7;margin-bottom:14px}.steps-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}.step-chip{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:100px;border:1px solid var(--border2);font-size:11px;font-weight:700;color:var(--muted);background:var(--dark2);transition:all .2s}.step-chip.done{background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.25);color:#6EE7B7}.clip-card{background:var(--dark2);border:1.5px solid var(--border2);border-radius:var(--radius);padding:16px;margin-bottom:12px;transition:border-color .2s}.clip-card.done{border-color:rgba(16,185,129,0.2)}.clip-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.clip-title{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.clip-status{font-size:10px;font-weight:800;padding:3px 10px;border-radius:100px}.clip-status.pending{background:var(--dark3);color:var(--muted)}.clip-status.played{background:rgba(168,85,247,0.1);color:#D8B4FE}.clip-status.done{background:rgba(16,185,129,0.1);color:#6EE7B7}.play-btn{width:100%;padding:10px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);border-radius:10px;color:#D8B4FE;font-family:var(--font-b);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:7px}.play-btn:disabled{opacity:.4;cursor:not-allowed}.play-btn.done-state{background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.2);color:#6EE7B7}.upload-area{border:2px dashed var(--border2);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:all .2s}.upload-area:hover{border-color:rgba(168,85,247,0.3);background:rgba(168,85,247,0.03)}.upload-area.has-file{border-color:rgba(16,185,129,0.3);border-style:solid;background:rgba(16,185,129,0.04)}.upload-icon{font-size:24px;margin-bottom:5px;display:block}.upload-text{font-size:12px;color:var(--muted2)}.upload-sub{font-size:10px;color:var(--muted);margin-top:3px}.photo-thumb{width:100%;max-height:140px;object-fit:contain;border-radius:8px;border:1px solid var(--border2);margin-bottom:8px;display:none;background:var(--dark3)}.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;gap:16px}.spinner{width:36px;height:36px;border:3px solid rgba(168,85,247,0.2);border-top-color:var(--purple);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.loading-text{font-size:13px;color:var(--muted)}</style></head>
+<body><div id="root"><div class="loading"><div class="spinner"></div><div class="loading-text">Loading task...</div></div></div>
+<script>
+const params=new URLSearchParams(window.location.search);
+const taskNumber=parseInt(params.get('task'))||1;
+const studentId=params.get('student')||'';
+let taskData=null;
+const CLIPS=4;
+const clipState=Array.from({length:CLIPS},()=>({played:false,photo:null}));
+window.addEventListener('DOMContentLoaded',async()=>{
+  const r=await api('get_task_data',{student_id:studentId,activity_name:'DictationX',task_number:taskNumber});
+  if(!r.success||!r.task){showError('Could not load task.');return;}
+  taskData=r.task;render();
+});
+function render(){
+  const allDone=clipState.every(c=>c.played&&c.photo);
+  document.getElementById('root').innerHTML=`
+    <div class="x-badge">✨ Dictation X · Task ${taskNumber}</div>
+    <div class="warn-box">⚠️ Each clip plays ONCE only — no pause, rewind, or replay. Write what you hear, then upload a photo for each clip.</div>
+    <div class="exb-box">🌟 Score above 90% accuracy → earn DOUBLE tokens (EXB Bonus)!</div>
+    <div class="steps-row">
+      <div class="step-chip ${clipState.filter(c=>c.played).length>0?'done':''}">1. Listen to each clip</div>
+      <div class="step-chip ${clipState.filter(c=>c.photo).length>0?'done':''}">2. Write by hand</div>
+      <div class="step-chip ${allDone?'done':''}">3. Upload all 4 photos</div>
+    </div>
+    ${clipState.map((_,i)=>renderClip(i)).join('')}
+    <div style="background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.18);border-radius:12px;padding:12px 14px;font-size:12px;color:#93C5FD;margin-top:8px">
+      📬 Your score will be sent to your Inbox after OCR processing.
+    </div>`;
+}
+function renderClip(i){
+  const idx=i+1;
+  const state=clipState[i];
+  const audioPath=taskData[`Audio_${idx}_Path`]||'';
+  return`<div class="clip-card ${state.photo?'done':''}" id="clipcard-${i}">
+    <div class="clip-header">
+      <div class="clip-title">Clip ${idx} / ${CLIPS}</div>
+      <div class="clip-status ${state.photo?'done':state.played?'played':'pending'}">${state.photo?'✓ Photo uploaded':state.played?'Clip played':'Not started'}</div>
+    </div>
+    <button class="play-btn ${state.played?'done-state':''}" id="playbtn-${i}"
+      onclick="playClip(${i},'${audioPath}')" ${state.played?'disabled':''}>
+      ${state.played?'✅ Played':'▶ Play Clip '+idx+' (once)'}
+    </button>
+    ${state.played?`
+      <input type="file" id="file-${i}" accept="image/*" style="display:none" onchange="handlePhoto(${i},this)">
+      <img id="thumb-${i}" class="photo-thumb" ${state.photo?`src="${state.photo}" style="display:block"`:''}  alt="">
+      <div class="upload-area ${state.photo?'has-file':''}" onclick="document.getElementById('file-${i}').click()">
+        <span class="upload-icon">${state.photo?'✅':'📸'}</span>
+        <div class="upload-text">${state.photo?'Photo uploaded! Tap to change.':'Upload photo of your handwriting'}</div>
+        <div class="upload-sub">Clear, well-lit photo only</div>
+      </div>`:'<div style="font-size:12px;color:var(--muted);text-align:center;padding:10px 0">Play the clip first, write what you hear, then upload your photo.</div>'}
+  </div>`;
+}
+function playClip(i,audioPath){
+  if(clipState[i].played)return;
+  const btn=document.getElementById('playbtn-'+i);
+  if(btn){btn.textContent='🔊 Playing...';btn.disabled=true;}
+  if(audioPath){
+    const audio=new Audio(audioPath);
+    audio.onended=()=>finishPlay(i);
+    audio.onerror=()=>finishPlay(i);
+    audio.play().catch(()=>finishPlay(i));
+  } else { setTimeout(()=>finishPlay(i),2000); }
+}
+function finishPlay(i){
+  clipState[i].played=true;
+  render();
+}
+function handlePhoto(i,input){
+  const file=input.files[0];
+  if(!file)return;
+  if(file.size>10*1024*1024){alert('Photo must be under 10MB.');return;}
+  const reader=new FileReader();
+  reader.onload=e=>{clipState[i].photo=e.target.result;render();};
+  reader.readAsDataURL(file);
+}
+window.getSubmitPayload=function(){
+  const missing=clipState.findIndex(c=>!c.photo);
+  if(missing>-1)throw new Error(`Please upload a photo for Clip ${missing+1} before submitting.`);
+  return{photo_drive_url:clipState.map(c=>c.photo),task_number:taskNumber};
+};
+window.getAnswers=function(){return window.getSubmitPayload();};
+function showError(msg){document.getElementById('root').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)">⚠️ ${msg}</div>`;}
+</script></body></html>

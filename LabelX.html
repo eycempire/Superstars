@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"><title>Label X</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="../config.js"></script>
+<style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}:root{--gold:#FFD700;--purple:#A855F7;--dark:#0F0F1A;--dark2:#181825;--dark3:#222235;--border2:rgba(255,255,255,0.07);--text:#EEEEF5;--muted:#7777AA;--muted2:#AAAACC;--success:#10B981;--error:#EF4444;--font-b:'Syne',sans-serif;--font-mono:'JetBrains Mono',monospace;--radius:14px}body{font-family:var(--font-b);background:var(--dark);color:var(--text);padding:16px 14px 32px}.x-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);border-radius:100px;padding:5px 14px;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#D8B4FE;margin-bottom:14px}.slide-card{background:var(--dark2);border:1.5px solid rgba(168,85,247,0.2);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}.slide-card::before{content:'';position:absolute;top:0;left:10%;right:10%;height:2px;background:linear-gradient(90deg,transparent,var(--purple),transparent)}.slide-num{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}.timer-wrap{margin-bottom:16px}.timer-track{height:5px;background:var(--dark3);border-radius:100px;overflow:hidden}.timer-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--success),var(--gold));transition:width .1s linear}.timer-fill.danger{background:linear-gradient(90deg,var(--error),#FCA5A5)}.timer-count{font-family:var(--font-mono);font-size:12px;text-align:right;margin-top:5px;color:var(--muted2)}.timer-count.danger{color:var(--error)}.sentence-words{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}.word-chip{padding:8px 12px;background:var(--dark3);border:1.5px solid var(--border2);border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--text)}.word-chip:hover{border-color:rgba(168,85,247,0.35);color:#D8B4FE}.word-chip.selected{border-color:var(--purple);background:rgba(168,85,247,0.1);color:#D8B4FE}.word-chip.correct{border-color:var(--success);background:rgba(16,185,129,0.08);color:#6EE7B7;cursor:default}.word-chip.wrong{border-color:var(--error);background:rgba(239,68,68,0.08);color:#FCA5A5;cursor:default}.correction-row{display:flex;align-items:center;gap:10px;margin-top:14px}.corr-label{font-size:12px;color:var(--muted);white-space:nowrap}.corr-input{flex:1;background:var(--dark3);border:1.5px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--font-b);font-size:13px;font-weight:600;outline:none;transition:border-color .2s;caret-color:var(--purple)}.corr-input:focus{border-color:rgba(168,85,247,0.4)}.corr-input::placeholder{color:var(--muted)}.progress-dots{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}.pdot{width:8px;height:8px;border-radius:50%;background:var(--dark3);border:1px solid var(--border2);transition:all .3s}.pdot.ok{background:var(--success);border-color:var(--success)}.pdot.bad{background:var(--error);border-color:var(--error)}.pdot.active{background:var(--purple);border-color:var(--purple);box-shadow:0 0 6px var(--purple)}.result-bar{margin-top:12px;padding:10px 12px;border-radius:8px;font-size:12px;font-weight:700;display:none}.result-bar.show{display:flex;align-items:center;gap:6px}.result-bar.ok{background:rgba(16,185,129,0.08);color:#6EE7B7}.result-bar.bad{background:rgba(239,68,68,0.08);color:#FCA5A5}.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;gap:16px}.spinner{width:36px;height:36px;border:3px solid rgba(168,85,247,0.2);border-top-color:var(--purple);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.loading-text{font-size:13px;color:var(--muted)}</style></head>
+<body><div id="root"><div class="loading"><div class="spinner"></div><div class="loading-text">Loading task...</div></div></div>
+<script>
+const params=new URLSearchParams(window.location.search);
+const taskNumber=parseInt(params.get('task'))||1;
+const studentId=params.get('student')||'';
+let taskData=null,slides=[],currentSlide=0,slideAnswers=[],timerInterval=null,timerSec=15,selectedWord=null;
+window.addEventListener('DOMContentLoaded',async()=>{
+  const r=await api('get_task_data',{student_id:studentId,activity_name:'LabelX',task_number:taskNumber});
+  if(!r.success||!r.task){showError('Could not load task.');return;}
+  taskData=r.task;
+  for(let i=1;i<=10;i++){const s=taskData['Sentence_'+i];if(s)slides.push({sentence:s,wrongWord:taskData['Wrong_Word_'+i]||'',correction:taskData['Correction_'+i]||''});}
+  render();startTimer();
+});
+function render(){
+  if(currentSlide>=slides.length){renderDone();return;}
+  const s=slides[currentSlide];
+  const words=s.sentence.split(' ');
+  document.getElementById('root').innerHTML=`
+    <div class="x-badge">✨ Label X · Task ${taskNumber}</div>
+    <div class="progress-dots">${slides.map((_,i)=>{const a=slideAnswers[i];let cls='';if(a!==undefined)cls=a.selectedWord===slides[i].wrongWord?'ok':'bad';else if(i===currentSlide)cls='active';return`<div class="pdot ${cls}"></div>`;}).join('')}</div>
+    <div class="slide-card">
+      <div class="slide-num">Sentence ${currentSlide+1} of ${slides.length}</div>
+      <div class="timer-wrap">
+        <div class="timer-track"><div class="timer-fill" id="timerFill"></div></div>
+        <div class="timer-count" id="timerCount">${timerSec}s</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted2);margin-bottom:10px">👆 Tap the incorrect word</div>
+      <div class="sentence-words">
+        ${words.map((w,i)=>`<div class="word-chip" id="wc-${i}" onclick="selectWord('${w.replace(/['"]/g,'')}',${i})">${w}</div>`).join('')}
+      </div>
+      <div class="correction-row" id="corrRow" style="display:none">
+        <span class="corr-label">Correction:</span>
+        <input type="text" class="corr-input" id="corrInput" placeholder="Type the correct word..." maxlength="40" autocomplete="off" spellcheck="false">
+      </div>
+    </div>`;
+  updateTimer();
+}
+function selectWord(word,idx){
+  selectedWord=word;
+  document.querySelectorAll('.word-chip').forEach((el,i)=>{el.className='word-chip'+(i===idx?' selected':'');});
+  document.getElementById('corrRow').style.display='flex';
+  document.getElementById('corrInput').focus();
+}
+function startTimer(){
+  timerSec=15;updateTimer();
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{
+    timerSec--;updateTimer();
+    if(timerSec<=0){clearInterval(timerInterval);submitSlide(true);}
+  },1000);
+}
+function updateTimer(){
+  const fill=document.getElementById('timerFill');
+  const count=document.getElementById('timerCount');
+  if(!fill||!count)return;
+  const pct=(timerSec/15)*100;
+  fill.style.width=pct+'%';
+  fill.className='timer-fill'+(timerSec<=5?' danger':'');
+  count.textContent=timerSec+'s';
+  count.className='timer-count'+(timerSec<=5?' danger':'');
+}
+function submitSlide(timedOut){
+  clearInterval(timerInterval);
+  const corrInput=document.getElementById('corrInput');
+  slideAnswers[currentSlide]={selected_word:selectedWord||'',correction:corrInput?.value?.trim()||'',timed_out:timedOut};
+  currentSlide++;
+  selectedWord=null;
+  setTimeout(()=>{render();if(currentSlide<slides.length)startTimer();},300);
+}
+function renderDone(){
+  document.getElementById('root').innerHTML=`
+    <div class="x-badge">✨ Label X · Complete</div>
+    <div style="text-align:center;padding:40px;color:var(--muted2)">
+      <div style="font-size:48px;margin-bottom:12px">✅</div>
+      <div style="font-size:16px;font-weight:700;color:var(--text)">All sentences done!</div>
+      <div style="font-size:13px;margin-top:8px">Press Submit to get your score.</div>
+    </div>`;}
+window.getCurrentAnswer=function(){return{selected_word:selectedWord||'',correction:document.getElementById('corrInput')?.value?.trim()||'',timed_out:false};};
+window.nextSlide=function(){submitSlide(false);};
+window.getAnswers=function(){return slideAnswers;};
+function showError(msg){document.getElementById('root').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)">⚠️ ${msg}</div>`;}
+// Submit on Enter
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&selectedWord&&currentSlide<slides.length)submitSlide(false);});
+</script></body></html>

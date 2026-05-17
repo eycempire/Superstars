@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Figurative Activity</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --gold:#FFD700; --gold2:#FFA500; --dark:#0F0F1A; --dark2:#181825; --dark3:#222235;
+  --border:rgba(255,215,0,0.12); --border2:rgba(255,255,255,0.07);
+  --text:#EEEEF5; --muted:#7777AA; --muted2:#AAAACC; --success:#10B981; --error:#EF4444;
+  --font-b:'Syne',sans-serif; --font-mono:'JetBrains Mono',monospace; --radius:14px;
+}
+body { font-family:var(--font-b); background:var(--dark); color:var(--text); padding:16px 14px 32px; }
+
+.header { margin-bottom:14px; }
+.h-title { font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+.h-sub   { font-size:12px; color:var(--muted2); line-height:1.5; }
+
+.progress-info { display:flex; justify-content:space-between; margin-bottom:14px; font-size:12px; color:var(--muted); }
+.progress-info strong { color:var(--gold); font-family:var(--font-mono); }
+
+.dialogues { display:flex; flex-direction:column; gap:14px; }
+
+.dialogue-card {
+  background:var(--dark2); border:1.5px solid var(--border2);
+  border-radius:var(--radius); padding:16px;
+  transition:border-color .2s;
+}
+.dialogue-card.answered { border-color:rgba(255,215,0,0.15); }
+.d-num { font-size:9px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+
+.dialogue-lines { margin-bottom:12px; }
+.d-line {
+  font-size:13px; color:var(--muted2); line-height:1.6;
+  padding:3px 0;
+  display:flex; gap:8px;
+}
+.d-speaker { font-weight:800; color:var(--muted); white-space:nowrap; }
+.d-text { flex:1; }
+.d-line.highlight .d-text { color:var(--text); }
+
+.figurative-phrase {
+  display:inline; background:rgba(255,215,0,0.1);
+  border:1px solid rgba(255,215,0,0.25);
+  border-radius:6px; padding:1px 6px;
+  color:var(--gold); font-weight:700;
+  font-style:italic;
+}
+
+.d-prompt {
+  font-size:12px; color:var(--muted); margin-bottom:8px;
+  display:flex; align-items:center; gap:6px;
+}
+.d-prompt span { font-size:14px; }
+
+.d-input {
+  width:100%; background:var(--dark3); border:1.5px solid var(--border2);
+  border-radius:8px; padding:10px 12px;
+  color:var(--text); font-family:var(--font-b);
+  font-size:13px; line-height:1.5; resize:none; outline:none;
+  transition:border-color .2s; caret-color:var(--gold);
+  min-height:64px;
+}
+.d-input:focus { border-color:rgba(255,215,0,0.3); }
+.d-input::placeholder { color:var(--muted); }
+
+.loading { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:300px; gap:16px; }
+.spinner { width:36px; height:36px; border:3px solid rgba(255,215,0,0.15); border-top-color:var(--gold); border-radius:50%; animation:spin .8s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.loading-text { font-size:13px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div id="root"><div class="loading"><div class="spinner"></div><div class="loading-text">Loading dialogues...</div></div></div>
+<script src="../config.js"></script>
+<script>
+const params     = new URLSearchParams(window.location.search);
+const taskNumber = parseInt(params.get('task')) || 1;
+const studentId  = params.get('student') || '';
+let taskData = null;
+const TOTAL  = 10;
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const r = await api('get_task_data', { student_id:studentId, activity_name:'Figurative', task_number:taskNumber });
+  if (!r.success || !r.task) { showError('Could not load task.'); return; }
+  taskData = r.task;
+  render();
+});
+
+function render() {
+  const dialogues = [];
+  for (let i = 1; i <= TOTAL; i++) {
+    const dialogue   = taskData[`Dialogue_${i}`]   || '';
+    const expression = taskData[`Expression_${i}`] || '';
+    if (dialogue) dialogues.push({ idx:i, dialogue, expression });
+  }
+
+  document.getElementById('root').innerHTML = `
+    <div class="header">
+      <div class="h-title">Figurative · Task ${taskNumber}</div>
+      <div class="h-sub">Read each dialogue. Write a sentence with the same meaning as the highlighted expression.</div>
+    </div>
+    <div class="progress-info">
+      <span>Answered: <strong id="filledCount">0</strong> / ${TOTAL}</span>
+      <span>⚡ up to ${CONFIG?.TOKENS?.Figurative||50} tokens</span>
+    </div>
+    <div class="dialogues">
+      ${dialogues.map((d,i) => renderDialogue(d,i)).join('')}
+    </div>
+  `;
+}
+
+function renderDialogue(d, i) {
+  // Parse dialogue lines: "A: text | B: text | ..."
+  const lines = d.dialogue.split('|').map(l => l.trim()).filter(Boolean);
+  const linesHTML = lines.map(line => {
+    const colonIdx  = line.indexOf(':');
+    const speaker   = colonIdx > -1 ? line.slice(0,colonIdx).trim() : '';
+    let   text      = colonIdx > -1 ? line.slice(colonIdx+1).trim() : line;
+    const isHighlight = d.expression && text.toLowerCase().includes(d.expression.toLowerCase());
+    if (isHighlight) {
+      text = text.replace(
+        new RegExp(d.expression.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'gi'),
+        m => `<span class="figurative-phrase">${m}</span>`
+      );
+    }
+    return `<div class="d-line ${isHighlight?'highlight':''}">
+      <span class="d-speaker">${speaker}${speaker?':':''}</span>
+      <span class="d-text">${text}</span>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="dialogue-card" id="dc-${i}">
+      <div class="d-num">Dialogue ${d.idx}</div>
+      <div class="dialogue-lines">${linesHTML}</div>
+      <div class="d-prompt"><span>✍️</span>Write a sentence with the same meaning as "<strong>${d.expression}</strong>":</div>
+      <textarea class="d-input" id="di-${i}" placeholder="Type your sentence here..." rows="2" oninput="updateCount()"></textarea>
+    </div>`;
+}
+
+function updateCount() {
+  let filled = 0;
+  for (let i = 0; i < TOTAL; i++) {
+    if (document.getElementById(`di-${i}`)?.value?.trim()) filled++;
+  }
+  const el = document.getElementById('filledCount');
+  if (el) el.textContent = filled;
+}
+
+window.getAnswers = function() {
+  return Array.from({length:TOTAL},(_,i) => ({
+    dialogue_index: i+1,
+    sentence: document.getElementById(`di-${i}`)?.value?.trim() || ''
+  }));
+};
+
+function showError(msg) {
+  document.getElementById('root').innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">⚠️ ${msg}</div>`;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Grammar X Activity</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --gold:#FFD700; --gold2:#FFA500; --purple:#A855F7; --purple-dim:rgba(168,85,247,0.1);
+  --dark:#0F0F1A; --dark2:#181825; --dark3:#222235;
+  --border:rgba(168,85,247,0.15); --border2:rgba(255,255,255,0.07);
+  --text:#EEEEF5; --muted:#7777AA; --muted2:#AAAACC; --success:#10B981; --error:#EF4444;
+  --font-b:'Syne',sans-serif; --font-mono:'JetBrains Mono',monospace; --radius:14px;
+}
+body { font-family:var(--font-b); background:var(--dark); color:var(--text); padding:16px 14px 32px; }
+
+.x-badge { display:inline-flex; align-items:center; gap:7px; background:var(--purple-dim); border:1px solid rgba(168,85,247,0.25); border-radius:100px; padding:5px 14px; font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#D8B4FE; margin-bottom:14px; }
+
+.text-card { background:var(--dark2); border:1px solid var(--border2); border-radius:var(--radius); padding:18px; margin-bottom:16px; }
+.text-label { font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+.passage { font-size:14px; line-height:1.8; color:var(--text); }
+
+.requirement-box {
+  background:rgba(168,85,247,0.07); border:1px solid rgba(168,85,247,0.2);
+  border-radius:var(--radius); padding:14px 16px; margin-bottom:18px;
+}
+.req-label { font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:#D8B4FE; margin-bottom:8px; }
+.req-text  { font-size:14px; color:var(--text); font-weight:600; }
+
+.inputs-section { margin-bottom:16px; }
+.inputs-label { font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+.input-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.input-num { font-family:var(--font-mono); font-size:12px; color:var(--muted); width:18px; flex-shrink:0; text-align:center; }
+.x-input {
+  flex:1; background:var(--dark3); border:1.5px solid var(--border2);
+  border-radius:8px; padding:10px 14px; color:var(--text); font-family:var(--font-b);
+  font-size:13px; font-weight:600; outline:none; transition:border-color .2s;
+  caret-color:var(--purple);
+}
+.x-input:focus { border-color:rgba(168,85,247,0.4); }
+.x-input::placeholder { color:var(--muted); font-weight:400; }
+
+.warning-box { background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.15); border-radius:var(--radius); padding:12px 14px; font-size:12px; color:#FCA5A5; margin-bottom:14px; }
+
+.loading { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:300px; gap:16px; }
+.spinner { width:36px; height:36px; border:3px solid rgba(168,85,247,0.2); border-top-color:var(--purple); border-radius:50%; animation:spin .8s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.loading-text { font-size:13px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div id="root"><div class="loading"><div class="spinner"></div><div class="loading-text">Loading task...</div></div></div>
+<script src="../config.js"></script>
+<script>
+const params     = new URLSearchParams(window.location.search);
+const taskNumber = parseInt(params.get('task')) || 1;
+const studentId  = params.get('student') || '';
+let taskData = null;
+const INPUTS = 5;
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const r = await api('get_task_data', { student_id:studentId, activity_name:'GrammarX', task_number:taskNumber });
+  if (!r.success || !r.task) { showError('Could not load task.'); return; }
+  taskData = r.task;
+  render();
+});
+
+function render() {
+  document.getElementById('root').innerHTML = `
+    <div class="x-badge">✨ Grammar X · Task ${taskNumber}</div>
+
+    <div class="warning-box">⚠️ All ${INPUTS} answers must be correct to earn tokens. Spelling must be exact. Uppercase/lowercase is accepted.</div>
+
+    <div class="text-card">
+      <div class="text-label">Read the text carefully</div>
+      <div class="passage">${taskData.Text_Content || 'Text passage will appear here.'}</div>
+    </div>
+
+    <div class="requirement-box">
+      <div class="req-label">Your task</div>
+      <div class="req-text">${taskData.Requirement || 'Extract the required items from the text above.'}</div>
+    </div>
+
+    <div class="inputs-section">
+      <div class="inputs-label">Your ${INPUTS} Answers</div>
+      ${Array.from({length:INPUTS},(_,i) => `
+        <div class="input-row">
+          <span class="input-num">${i+1}</span>
+          <input type="text" class="x-input" id="xi-${i}"
+            placeholder="Answer ${i+1}..." maxlength="80"
+            autocomplete="off" spellcheck="false">
+        </div>`).join('')}
+    </div>
+  `;
+}
+
+window.getAnswers = function() {
+  return Array.from({length:INPUTS}, (_,i) => document.getElementById(`xi-${i}`)?.value?.trim() || '');
+};
+
+function showError(msg) {
+  document.getElementById('root').innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">⚠️ ${msg}</div>`;
+}
+</script>
+</body>
+</html>
