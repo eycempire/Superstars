@@ -508,14 +508,12 @@
     const age   = document.getElementById("age").value;
     const email = document.getElementById("email").value.trim();
 
-    if (!name)            return UI.toast("Please enter your full name.", "error");
-    if (!age || age < 8)  return UI.toast("Please enter a valid age.", "error");
+    if (!name)             return UI.toast("Please enter your full name.", "error");
+    if (!age || age < 8)   return UI.toast("Please enter a valid age.", "error");
     if (!email || !email.includes("@")) return UI.toast("Please enter a valid email.", "error");
 
     showStep(2);
   }
-
-  function goStep1()  { showStep(1); }
 
   function previewPhoto(input) {
     const file = input.files[0];
@@ -535,42 +533,33 @@
     reader.readAsDataURL(file);
   }
 
-async function registerNow() {
-  const name  = document.getElementById("fullName").value.trim();
-  const age   = Number(document.getElementById("age").value);
-  const email = document.getElementById("email").value.trim();
-
-  UI.loader(true, "Creating your account...");
-
-  // ❌ مش بنبعت الصورة هنا — بنبعتها بعد التسجيل منفصلة
-  const result = await api("register", {
-    full_name: name,
-    age,
-    email,
-    photo_url: ""  // فاضية دلوقتي
-  });
-
-  UI.loader(false);
-
-  if (!result.success) {
-    return UI.toast(result.error || "Registration failed.", "error");
-  }
-
-  // لو في صورة — ابعتها منفصلة بعد التسجيل
-  if (photoBase64 && result.student_id) {
-    await api("update_photo", {
-      student_id: result.student_id,
-      photo_url:  photoBase64
+  async function registerNow() {
+    const name  = document.getElementById("fullName").value.trim();
+    const age   = Number(document.getElementById("age").value);
+    const email = document.getElementById("email").value.trim();
+    
+    UI.loader(true, "Creating your account...");
+    
+    // ❌ مش بنبعت الصورة هنا — بنبعتها بعد التسجيل منفصلة
+    const result = await api("register", {
+      full_name: name,
+      age,
+      email,
+      photo_url: ""  // فاضية دلوقتي
     });
-  }
-
-  // باقي الكود زي ما هو...
-}
-
+    
     UI.loader(false);
-
+    
     if (!result.success) {
-      return UI.toast(result.error || "Registration failed. Try again.", "error");
+      return UI.toast(result.error || "Registration failed.", "error");
+    }
+    
+    // لو في صورة — ابعتها منفصلة بعد التسجيل
+    if (photoBase64 && result.student_id) {
+      await api("update_photo", {
+        student_id: result.student_id,
+        photo_url:  photoBase64
+      });
     }
 
     registeredStudent = result;
