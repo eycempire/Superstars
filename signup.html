@@ -5,396 +5,232 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Join Superstars — EYC Empire</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/theme.css">
 <script src="config.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  min-height:100vh; display:flex; align-items:center;
+  justify-content:center; padding:24px 16px;
+  position:relative; overflow-x:hidden;
+}
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(56,189,248,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(56,189,248,0.025) 1px,transparent 1px);
+  background-size:40px 40px; pointer-events:none;
+}
+.orb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;opacity:.35}
+.orb-1{width:400px;height:400px;background:radial-gradient(circle,rgba(56,189,248,0.25),transparent);top:-100px;right:-100px;animation:float 8s ease-in-out infinite}
+.orb-2{width:300px;height:300px;background:radial-gradient(circle,rgba(167,139,250,0.2),transparent);bottom:-80px;left:-80px;animation:float 10s ease-in-out infinite reverse}
+@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-20px)}}
 
-  :root {
-    --gold:    #FFD700;
-    --gold2:   #FFA500;
-    --dark:    #0A0A0F;
-    --dark2:   #12121A;
-    --dark3:   #1C1C28;
-    --border:  rgba(255,215,0,0.15);
-    --text:    #F0F0F5;
-    --muted:   #888899;
-    --success: #10B981;
-    --error:   #EF4444;
-    --radius:  16px;
-    --font-display: 'Bebas Neue', sans-serif;
-    --font-body:    'DM Sans', sans-serif;
-  }
+.card{
+  background:var(--bg-surface);border:1px solid var(--border-subtle);
+  border-radius:24px;padding:36px 32px;
+  width:100%;max-width:480px;
+  position:relative;box-shadow:var(--shadow-lg);animation:fadeUp .4s ease;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:10%;right:10%;height:2px;
+  background:linear-gradient(90deg,transparent,var(--blue),transparent);border-radius:2px;
+}
 
-  body {
-    font-family: var(--font-body);
-    background: var(--dark);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px 16px;
-    position: relative;
-    overflow-x: hidden;
-  }
+/* Logo */
+.logo{text-align:center;margin-bottom:24px}
+.logo-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--blue-dim);border:1px solid var(--blue-border);
+  border-radius:var(--radius-full);padding:6px 16px;margin-bottom:12px;
+}
+.logo-badge span{font-size:11px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+.logo h1{font-family:var(--font-display);font-size:44px;letter-spacing:3px;color:var(--text-primary);line-height:1;margin-bottom:6px}
+.logo h1 .acc{color:var(--blue)}
+.logo p{font-size:13px;color:var(--text-muted)}
 
-  /* Background grid */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255,215,0,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,215,0,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-  }
+/* Steps indicator */
+.steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:24px}
+.step-dot{
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;
+  border:2px solid var(--border-subtle);
+  color:var(--text-muted);background:var(--bg-overlay);
+  transition:var(--transition-base);position:relative;z-index:1;
+}
+.step-dot.active{border-color:var(--blue);color:#0D1117;background:var(--blue)}
+.step-dot.done{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.step-line{width:48px;height:2px;background:var(--border-subtle);transition:background .3s}
+.step-line.done{background:var(--green)}
 
-  /* Glow orbs */
-  .orb {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    pointer-events: none;
-    opacity: 0.4;
-  }
-  .orb-1 {
-    width: 400px; height: 400px;
-    background: radial-gradient(circle, rgba(255,215,0,0.3), transparent);
-    top: -100px; right: -100px;
-    animation: float1 8s ease-in-out infinite;
-  }
-  .orb-2 {
-    width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(255,100,0,0.2), transparent);
-    bottom: -80px; left: -80px;
-    animation: float2 10s ease-in-out infinite;
-  }
+/* Panels */
+.step-panel{display:none}
+.step-panel.active{display:block;animation:fadeUp .3s ease}
 
-  @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-30px,20px)} }
-  @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,-30px)} }
+/* Form */
+.form-group{margin-bottom:16px}
+label{
+  display:block;font-size:12px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:7px;
+}
+.field-input{
+  width:100%;background:var(--bg-overlay);
+  border:1.5px solid var(--border-subtle);
+  border-radius:var(--radius-sm);padding:12px 15px;
+  color:var(--text-primary);font-family:var(--font-body);
+  font-size:15px;outline:none;
+  transition:var(--transition-fast);-webkit-appearance:none;
+}
+.field-input:focus{border-color:var(--blue-border);box-shadow:0 0 0 3px var(--blue-dim)}
+.field-note{font-size:11px;color:var(--text-muted);margin-top:5px}
 
-  /* Card */
-  .card {
-    background: var(--dark2);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 40px 36px;
-    width: 100%;
-    max-width: 460px;
-    position: relative;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,215,0,0.05);
-  }
+.btn-primary{
+  width:100%;padding:14px;
+  background:var(--blue);color:#0D1117;
+  border:none;border-radius:var(--radius-md);
+  font-family:var(--font-display);font-size:20px;letter-spacing:2px;
+  cursor:pointer;transition:var(--transition-base);
+  position:relative;overflow:hidden;
+}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:var(--shadow-blue)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-ghost{
+  width:100%;padding:12px;background:transparent;
+  border:1.5px solid var(--border-subtle);
+  border-radius:var(--radius-md);color:var(--text-muted);
+  font-family:var(--font-body);font-size:14px;
+  cursor:pointer;transition:var(--transition-fast);margin-top:10px;
+}
+.btn-ghost:hover{border-color:var(--border-default);color:var(--text-primary)}
 
-  /* Top accent line */
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 10%; right: 10%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    border-radius: 2px;
-  }
+.login-link{text-align:center;font-size:13px;color:var(--text-muted);margin-top:18px}
+.login-link a{color:var(--blue);text-decoration:none;font-weight:600}
 
-  /* Logo */
-  .logo {
-    text-align: center;
-    margin-bottom: 32px;
-  }
-  .logo-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255,215,0,0.08);
-    border: 1px solid rgba(255,215,0,0.2);
-    border-radius: 100px;
-    padding: 6px 16px;
-    margin-bottom: 12px;
-  }
-  .logo-badge span { font-size: 11px; color: var(--gold); letter-spacing: .1em; text-transform: uppercase; font-weight: 600; }
-  .logo h1 {
-    font-family: var(--font-display);
-    font-size: 48px;
-    letter-spacing: 3px;
-    background: linear-gradient(135deg, var(--gold), var(--gold2), #fff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    line-height: 1;
-  }
-  .logo p { font-size: 13px; color: var(--muted); margin-top: 6px; }
+/* ── AVATAR BUILDER ─────────────────────────────────────── */
+.avatar-step-label{
+  text-align:center;font-size:13px;color:var(--text-secondary);
+  margin-bottom:14px;line-height:1.5;
+}
 
-  /* Steps indicator */
-  .steps {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    margin-bottom: 32px;
-  }
-  .step-dot {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 600;
-    border: 2px solid var(--dark3);
-    color: var(--muted);
-    background: var(--dark3);
-    transition: all .3s;
-    position: relative;
-    z-index: 1;
-  }
-  .step-dot.active {
-    border-color: var(--gold);
-    color: var(--dark);
-    background: var(--gold);
-  }
-  .step-dot.done {
-    border-color: var(--success);
-    color: var(--success);
-    background: rgba(16,185,129,0.1);
-  }
-  .step-line {
-    width: 48px; height: 2px;
-    background: var(--dark3);
-    transition: background .3s;
-  }
-  .step-line.done { background: var(--success); }
+/* Gender selection */
+.gender-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px}
+.gender-btn{
+  padding:16px 8px;
+  border:1.5px solid var(--border-subtle);
+  border-radius:var(--radius-lg);
+  background:var(--bg-overlay);
+  cursor:pointer;text-align:center;
+  transition:var(--transition-base);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.gender-btn:hover{border-color:var(--border-default)}
+.gender-btn.active{border-color:var(--blue);background:var(--blue-dim)}
+.gender-btn img{width:70px;height:70px;border-radius:50%;border:2px solid var(--border-subtle)}
+.gender-btn.active img{border-color:var(--blue-border)}
+.gender-label{font-size:14px;font-weight:700;color:var(--text-secondary)}
+.gender-btn.active .gender-label{color:var(--blue)}
 
-  /* Form */
-  .form-group {
-    margin-bottom: 18px;
-  }
-  label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
-  input[type="text"],
-  input[type="email"],
-  input[type="number"],
-  input[type="file"] {
-    width: 100%;
-    background: var(--dark3);
-    border: 1.5px solid rgba(255,255,255,0.06);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    color: var(--text);
-    font-family: var(--font-body);
-    font-size: 15px;
-    outline: none;
-    transition: border-color .2s, box-shadow .2s;
-    -webkit-appearance: none;
-  }
-  input:focus {
-    border-color: rgba(255,215,0,0.4);
-    box-shadow: 0 0 0 3px rgba(255,215,0,0.08);
-  }
-  input[type="file"] {
-    padding: 10px 16px;
-    cursor: pointer;
-    font-size: 13px;
-    color: var(--muted);
-  }
+/* Avatar customizer */
+.avatar-customizer{display:none}
+.avatar-customizer.show{display:block}
 
-  /* Photo preview */
-  .photo-preview {
-    width: 80px; height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--gold);
-    display: none;
-    margin: 12px auto 0;
-  }
-  .photo-note {
-    font-size: 11px;
-    color: var(--muted);
-    text-align: center;
-    margin-top: 8px;
-  }
+.avatar-preview-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  margin-bottom:16px;
+}
+.avatar-preview-wrap img{
+  width:100px;height:100px;border-radius:50%;
+  border:3px solid var(--blue-border);
+  box-shadow:0 0 20px var(--blue-dim);
+  margin-bottom:8px;
+}
+.avatar-preview-label{font-size:11px;color:var(--text-muted);text-align:center}
 
-  /* Button */
-  .btn {
-    width: 100%;
-    padding: 16px;
-    border-radius: var(--radius);
-    border: none;
-    font-family: var(--font-display);
-    font-size: 20px;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: all .2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .btn-gold {
-    background: linear-gradient(135deg, var(--gold), var(--gold2));
-    color: var(--dark);
-  }
-  .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(255,215,0,0.3); }
-  .btn-gold:active { transform: translateY(0); }
-  .btn-ghost {
-    background: transparent;
-    border: 1.5px solid var(--border);
-    color: var(--muted);
-    font-family: var(--font-body);
-    font-size: 14px;
-    letter-spacing: 0;
-  }
-  .btn-ghost:hover { border-color: rgba(255,215,0,0.3); color: var(--text); }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+.av-section{margin-bottom:12px}
+.av-section-title{
+  font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--text-muted);margin-bottom:7px;
+}
+.av-opts{display:flex;flex-wrap:wrap;gap:5px}
+.av-opt{
+  padding:4px 10px;
+  border:1px solid var(--border-subtle);
+  border-radius:var(--radius-full);
+  background:var(--bg-overlay);
+  cursor:pointer;font-size:12px;
+  color:var(--text-secondary);
+  transition:var(--transition-fast);white-space:nowrap;
+}
+.av-opt:hover:not(.active){background:var(--bg-surface);border-color:var(--border-default)}
+.av-opt.active{border-color:var(--blue-border);background:var(--blue-dim);color:var(--blue);font-weight:600}
 
-  /* Shimmer effect on btn */
-  .btn-gold::after {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 60%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    transform: skewX(-20deg);
-    transition: left .5s;
-  }
-  .btn-gold:hover::after { left: 150%; }
+/* Color dots */
+.av-colors{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.av-color{
+  width:24px;height:24px;border-radius:50%;
+  cursor:pointer;border:2px solid transparent;
+  transition:all .15s;flex-shrink:0;
+}
+.av-color:hover{transform:scale(1.15)}
+.av-color.active{border-color:var(--text-primary);transform:scale(1.2)}
 
-  /* Divider */
-  .divider {
-    display: flex; align-items: center; gap: 12px;
-    margin: 20px 0;
-    color: var(--muted); font-size: 12px;
-  }
-  .divider::before, .divider::after {
-    content: ''; flex: 1;
-    height: 1px; background: var(--border);
-  }
+.change-gender-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:12px;color:var(--text-muted);background:none;
+  border:none;cursor:pointer;padding:0;margin-bottom:12px;
+  transition:color .15s;
+}
+.change-gender-btn:hover{color:var(--blue)}
 
-  /* Login link */
-  .login-link {
-    text-align: center;
-    font-size: 13px;
-    color: var(--muted);
-    margin-top: 20px;
-  }
-  .login-link a {
-    color: var(--gold);
-    text-decoration: none;
-    font-weight: 600;
-  }
+/* Success */
+.success-content{text-align:center}
+.success-icon{font-size:60px;margin-bottom:14px;display:block;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+.success-content h2{font-family:var(--font-display);font-size:32px;letter-spacing:2px;color:var(--text-primary);margin-bottom:6px}
+.success-content p{color:var(--text-muted);font-size:14px;margin-bottom:20px}
 
-  /* Success card */
-  .success-card {
-    display: none;
-    text-align: center;
-  }
-  .success-icon {
-    font-size: 64px;
-    margin-bottom: 16px;
-    display: block;
-    animation: pop .4s cubic-bezier(.34,1.56,.64,1);
-  }
-  @keyframes pop { from{transform:scale(0)} to{transform:scale(1)} }
-  .success-card h2 {
-    font-family: var(--font-display);
-    font-size: 36px;
-    letter-spacing: 2px;
-    color: var(--gold);
-    margin-bottom: 8px;
-  }
-  .success-card p { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+.warning-box{
+  background:var(--red-dim);border:1px solid var(--red-border);
+  border-radius:var(--radius-sm);padding:11px 14px;
+  font-size:12px;color:var(--red);margin-bottom:16px;text-align:left;
+}
+.credentials-box{
+  background:var(--bg-elevated);border:1px solid var(--border-default);
+  border-radius:var(--radius-lg);padding:16px;margin-bottom:18px;text-align:left;
+}
+.cred-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--border-subtle);
+}
+.cred-row:last-child{border-bottom:none}
+.cred-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+.cred-value{font-family:var(--font-mono);font-size:17px;font-weight:700;color:var(--blue);letter-spacing:3px}
+.copy-btn{
+  background:var(--blue-dim);border:1px solid var(--blue-border);
+  border-radius:var(--radius-sm);padding:3px 9px;
+  font-size:11px;color:var(--blue);cursor:pointer;transition:var(--transition-fast);
+}
+.copy-btn:hover{background:rgba(56,189,248,0.2)}
 
-  .credentials-box {
-    background: var(--dark3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 24px;
-    text-align: left;
-  }
-  .cred-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-  }
-  .cred-row:last-child { border-bottom: none; }
-  .cred-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
-  .cred-value {
-    font-family: 'Courier New', monospace;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--gold);
-    letter-spacing: 3px;
-  }
-  .copy-btn {
-    background: rgba(255,215,0,0.1);
-    border: 1px solid rgba(255,215,0,0.2);
-    border-radius: 8px;
-    padding: 4px 10px;
-    font-size: 11px;
-    color: var(--gold);
-    cursor: pointer;
-    transition: all .2s;
-  }
-  .copy-btn:hover { background: rgba(255,215,0,0.2); }
-
-  .warning-box {
-    background: rgba(239,68,68,0.08);
-    border: 1px solid rgba(239,68,68,0.2);
-    border-radius: var(--radius);
-    padding: 12px 16px;
-    font-size: 12px;
-    color: #FCA5A5;
-    margin-bottom: 20px;
-    text-align: left;
-  }
-
-  /* Step panels */
-  .step-panel { display: none; }
-  .step-panel.active { display: block; }
-
-  /* Fade in */
-  .step-panel.active {
-    animation: fadeUp .3s ease;
-  }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Age note */
-  .field-note {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 6px;
-  }
-
-  /* Mobile */
-  @media (max-width: 480px) {
-    .card { padding: 28px 20px; }
-    .logo h1 { font-size: 40px; }
-  }
+@media(max-width:480px){
+  .card{padding:26px 18px}
+  .logo h1{font-size:38px}
+}
 </style>
 </head>
 <body>
-
 <div class="orb orb-1"></div>
 <div class="orb orb-2"></div>
 
 <div class="card">
-
-  <!-- LOGO -->
   <div class="logo">
-    <div class="logo-badge">
-      <span>⭐ EYC Empire</span>
-    </div>
-    <h1>SUPERSTARS</h1>
+    <div class="logo-badge"><span>⭐ EYC Empire</span></div>
+    <h1>SUPER<span class="acc">STARS</span></h1>
     <p>Your English journey starts here</p>
   </div>
 
-  <!-- STEPS -->
+  <!-- Steps -->
   <div class="steps" id="stepsBar">
     <div class="step-dot active" id="dot1">1</div>
     <div class="step-line" id="line1"></div>
@@ -403,204 +239,439 @@
     <div class="step-dot" id="dot3">3</div>
   </div>
 
-  <!-- STEP 1 — Basic Info -->
+  <!-- ── STEP 1: Basic Info ─────────────────────────────── -->
   <div class="step-panel active" id="step1">
     <div class="form-group">
       <label>Full Name</label>
-      <input type="text" id="fullName" placeholder="Enter your full name" maxlength="60">
+      <input type="text" class="field-input" id="fullName" placeholder="Enter your full name" maxlength="60">
     </div>
     <div class="form-group">
       <label>Age</label>
-      <input type="number" id="age" placeholder="Your age" min="8" max="99">
+      <input type="number" class="field-input" id="age" placeholder="Your age" min="8" max="99">
       <p class="field-note">You must have a Google account to join.</p>
     </div>
     <div class="form-group">
       <label>Google Email</label>
-      <input type="email" id="email" placeholder="your@gmail.com">
+      <input type="email" class="field-input" id="email" placeholder="your@gmail.com">
     </div>
-    <button class="btn btn-gold" onclick="goStep2()">CONTINUE →</button>
+    <button class="btn-primary" onclick="goStep2()">CONTINUE →</button>
   </div>
 
-  <!-- STEP 2 — Photo -->
+  <!-- ── STEP 2: Avatar Builder ─────────────────────────── -->
   <div class="step-panel" id="step2">
-    <div class="form-group" style="text-align:center">
-      <label style="text-align:center;display:block;">Profile Photo <span style="color:var(--muted);font-weight:400;text-transform:none;">(optional)</span></label>
-      <input type="file" id="photoInput" accept="image/*" onchange="previewPhoto(this)">
-      <img id="photoPreview" class="photo-preview" alt="preview">
-      <p class="photo-note">📋 All photos are reviewed by admins before being displayed. Please upload an appropriate photo.</p>
+    <div class="avatar-step-label" id="avatarStepLabel">
+      اختار جنسك عشان نبدأ نصمم الأفاتار بتاعك 🎨
     </div>
-    <div style="display:flex;gap:10px;margin-top:8px;">
-      <button class="btn btn-ghost" onclick="goStep1()" style="flex:1">← BACK</button>
-      <button class="btn btn-gold" onclick="registerNow()" style="flex:2">JOIN NOW 🚀</button>
+
+    <!-- Gender selection -->
+    <div class="gender-row" id="genderRow">
+      <div class="gender-btn" id="btn-male" onclick="selectGender('male')">
+        <img id="prev-male" src="" alt="ولد">
+        <span class="gender-label">👦 ولد</span>
+      </div>
+      <div class="gender-btn" id="btn-female" onclick="selectGender('female')">
+        <img id="prev-female" src="" alt="بنت">
+        <span class="gender-label">👧 بنت</span>
+      </div>
+    </div>
+
+    <!-- Customizer (shown after gender pick) -->
+    <div class="avatar-customizer" id="avatarCustomizer">
+      <button class="change-gender-btn" onclick="changeGender()">← تغيير الجنس</button>
+
+      <div class="avatar-preview-wrap">
+        <img id="mainAvatar" src="" alt="الأفاتار بتاعك">
+        <div class="avatar-preview-label">تغيير لايف — الأفاتار بيتحدث فور اختيارك</div>
+      </div>
+
+      <div id="optionsWrap"></div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn-ghost" onclick="goStep1()" style="margin-top:0;flex:1">← BACK</button>
+      <button class="btn-primary" onclick="goStep3()" style="flex:2" id="step2NextBtn">JOIN NOW 🚀</button>
     </div>
   </div>
 
-  <!-- STEP 3 — Success + Credentials -->
+  <!-- ── STEP 3: Success ────────────────────────────────── -->
   <div class="step-panel" id="step3">
-    <div class="success-card" id="successCard" style="display:block">
+    <div class="success-content">
       <span class="success-icon">🏆</span>
       <h2>WELCOME!</h2>
       <p>Your account has been created. Save your credentials — you'll need them to log in.</p>
 
       <div class="warning-box">
-        ⚠️ <strong>Important:</strong> Screenshot or write down your Code and Passkey. They will not be shown again. You can recover them via email if needed.
+        ⚠️ <strong>Important:</strong> Screenshot or write down your Code and Passkey now.
+      </div>
+
+      <div style="display:flex;justify-content:center;margin-bottom:16px">
+        <img id="successAvatar" src="" alt="أفاتارك"
+          style="width:90px;height:90px;border-radius:50%;border:3px solid var(--blue-border);box-shadow:0 0 20px var(--blue-dim)">
       </div>
 
       <div class="credentials-box">
         <div class="cred-row">
-          <div>
-            <div class="cred-label">Login Code</div>
-            <div class="cred-value" id="credCode">——</div>
-          </div>
-          <button class="copy-btn" onclick="copyText('credCode', this)">Copy</button>
+          <div><div class="cred-label">Login Code</div><div class="cred-value" id="credCode">——</div></div>
+          <button class="copy-btn" onclick="copyText('credCode',this)">Copy</button>
         </div>
         <div class="cred-row">
-          <div>
-            <div class="cred-label">Passkey</div>
-            <div class="cred-value" id="credPasskey">——</div>
-          </div>
-          <button class="copy-btn" onclick="copyText('credPasskey', this)">Copy</button>
+          <div><div class="cred-label">Passkey</div><div class="cred-value" id="credPasskey">——</div></div>
+          <button class="copy-btn" onclick="copyText('credPasskey',this)">Copy</button>
         </div>
         <div class="cred-row">
-          <div>
-            <div class="cred-label">Free Trial Ends</div>
-            <div class="cred-value" id="credTrial" style="font-size:14px;letter-spacing:1px;">——</div>
-          </div>
+          <div><div class="cred-label">Free Trial Ends</div>
+          <div class="cred-value" id="credTrial" style="font-size:13px;letter-spacing:1px">——</div></div>
         </div>
       </div>
 
-      <button class="btn btn-gold" onclick="goToDashboard()">START COMPETING 🔥</button>
+      <button class="btn-primary" onclick="goToDashboard()">START COMPETING 🔥</button>
     </div>
   </div>
 
-  <!-- Login link -->
   <div class="login-link" id="loginLinkRow">
     Already have an account? <a href="login.html">Log In</a>
   </div>
-
 </div>
 
 <script>
-  let photoBase64 = "";
-  let registeredStudent = null;
+// ── Avataaars Config ──────────────────────────────────────
+const AVATAR_BASE = 'https://avataaars.io/';
 
-  // ── Step navigation ──────────────────────────────────────
-  function showStep(n) {
-    [1,2,3].forEach(i => {
-      document.getElementById("step" + i).classList.toggle("active", i === n);
-      const dot = document.getElementById("dot" + i);
-      if (i < n)       { dot.className = "step-dot done"; dot.textContent = "✓"; }
-      else if (i === n){ dot.className = "step-dot active"; dot.textContent = i; }
-      else             { dot.className = "step-dot"; dot.textContent = i; }
-    });
-    if (document.getElementById("line1"))
-      document.getElementById("line1").className = "step-line" + (n > 1 ? " done" : "");
-    if (document.getElementById("line2"))
-      document.getElementById("line2").className = "step-line" + (n > 2 ? " done" : "");
+const SKIN_COLORS = {
+  Tanned:'#FD9841', Yellow:'#F8D25C', Pale:'#FFDBB4',
+  Light:'#EDB98A', Brown:'#D08B5B', DarkBrown:'#AE5D29', Black:'#614335'
+};
+const HAIR_COLORS = {
+  Auburn:'#A55728', Black:'#2C1B18', Blonde:'#B58143', BlondeGolden:'#D6B370',
+  Brown:'#724133', BrownDark:'#4A312C', PastelPink:'#F59797',
+  Platinum:'#EEEEEE', Red:'#C93305', SilverGray:'#E8E1E1'
+};
+const CLOTHE_COLORS = {
+  Black:'#262E33', Blue01:'#65C9FF', Blue02:'#81D2FF', Blue03:'#677EEE',
+  Gray01:'#B7C1BE', Gray02:'#929598', Heather:'#718AC1',
+  PastelBlue:'#AEB1FF', PastelGreen:'#A7FFC4', PastelYellow:'#FFDF89',
+  Pink:'#FF488E', Red:'#FF5C5C', White:'#FFFFFF'
+};
 
-    document.getElementById("loginLinkRow").style.display = n === 3 ? "none" : "block";
+const OPTIONS = {
+  male: [
+    { key:'topType', label:'الشعر',
+      values:['ShortHairShortFlat','ShortHairShortRound','ShortHairShortWaved','ShortHairSidePart',
+              'ShortHairDreads01','ShortHairDreads02','ShortHairFrizzle','LongHairBun',
+              'NoHair','Hat','WinterHat1','WinterHat2','Turban','Eyepatch'],
+      labels:['مسطح','مستدير','موجي','جانبي','دريدز 1','دريدز 2','مجعد','كعكة',
+              'بدون شعر','قبعة','قبعة شتوي 1','قبعة شتوي 2','عمامة','رباطة عين'],
+      colorKey:'hairColor' },
+    { key:'facialHairType', label:'شعر الوجه',
+      values:['Blank','BeardLight','BeardMajestic','BeardMedium','MoustacheFancy','MoustacheMagnum'],
+      labels:['بدون','لحية خفيفة','لحية ملكية','لحية متوسطة','شنب أنيق','شنب ضخم'],
+      colorKey:'facialHairColor' },
+    { key:'accessoriesType', label:'إكسسوارات',
+      values:['Blank','Kurt','Prescription01','Prescription02','Round','Sunglasses','Wayfarers'],
+      labels:['بدون','كيرت','نظارة 1','نظارة 2','دائري','شمسية','ويفيرز'] },
+    { key:'clotheType', label:'الملابس',
+      values:['BlazerShirt','BlazerSweater','CollarSweater','GraphicShirt','Hoodie','Overall','ShirtCrewNeck','ShirtScoopNeck','ShirtVNeck'],
+      labels:['بليزر وقميص','بليزر وسويتر','سويتر ياقة','تيشيرت مطبوع','هودي','أوفرول','تيشيرت مستدير','تيشيرت سكوب','تيشيرت V'],
+      colorKey:'clotheColor' },
+    { key:'eyeType', label:'العيون',
+      values:['Close','Cry','Default','Dizzy','EyeRoll','Happy','Hearts','Side','Squint','Surprised','Wink','WinkWacky'],
+      labels:['مغمضة','تبكي','عادي','دوار','دوران','سعيدة','قلوب','جانبي','ضيقة','متفاجئة','غمزة','غمزة مجنونة'] },
+    { key:'eyebrowType', label:'الحواجب',
+      values:['Angry','AngryNatural','Default','DefaultNatural','FlatNatural','RaisedExcited','SadConcerned','UnibrowNatural','UpDown'],
+      labels:['غاضب','غاضب طبيعي','عادي','عادي طبيعي','مسطح','مرفوع','حزين','حاجب واحد','أعلى وأسفل'] },
+    { key:'mouthType', label:'الفم',
+      values:['Concerned','Default','Disbelief','Eating','Grimace','Sad','ScreamOpen','Serious','Smile','Tongue','Twinkle'],
+      labels:['قلق','عادي','لا مصداقية','آكل','تقطيب','حزين','صارخ','جاد','مبتسم','لسان','لامع'] },
+    { key:'skinColor', label:'لون البشرة', isColor:true, palette:SKIN_COLORS }
+  ],
+  female: [
+    { key:'topType', label:'الشعر / الغطاء',
+      values:['LongHairBigHair','LongHairBob','LongHairBun','LongHairCurly','LongHairCurvy',
+              'LongHairDreads','LongHairFrida','LongHairFro','LongHairFroBand',
+              'LongHairNotTooLong','LongHairShavedSides','LongHairMiaWallace',
+              'LongHairStraight','LongHairStraight2','LongHairStraightStrand',
+              'ShortHairShortFlat','ShortHairShortRound','ShortHairDreads01',
+              'Hijab','Turban','WinterHat1','WinterHat2','WinterHat3','WinterHat4'],
+      labels:['شعر كبير','بوب','كعكة','مجعد','متموج',
+              'دريدز','فريدا','أفرو','أفرو بند',
+              'طويل عادي','جانبي محلوق','ميا والاس',
+              'مستقيم','مستقيم 2','خصلات',
+              'قصير مسطح','قصير مستدير','قصير دريدز',
+              'حجاب 🧕','عمامة','قبعة شتوي 1','قبعة شتوي 2','قبعة شتوي 3','قبعة شتوي 4'],
+      colorKey:'hairColor' },
+    { key:'accessoriesType', label:'إكسسوارات',
+      values:['Blank','Kurt','Prescription01','Prescription02','Round','Sunglasses','Wayfarers'],
+      labels:['بدون','كيرت','نظارة 1','نظارة 2','دائري','شمسية','ويفيرز'] },
+    { key:'clotheType', label:'الملابس',
+      values:['BlazerShirt','BlazerSweater','CollarSweater','GraphicShirt','Hoodie','Overall','ShirtCrewNeck','ShirtScoopNeck','ShirtVNeck'],
+      labels:['بليزر وقميص','بليزر وسويتر','سويتر ياقة','تيشيرت مطبوع','هودي','أوفرول','تيشيرت مستدير','تيشيرت سكوب','تيشيرت V'],
+      colorKey:'clotheColor' },
+    { key:'eyeType', label:'العيون',
+      values:['Close','Cry','Default','Dizzy','EyeRoll','Happy','Hearts','Side','Squint','Surprised','Wink','WinkWacky'],
+      labels:['مغمضة','تبكي','عادي','دوار','دوران','سعيدة','قلوب','جانبي','ضيقة','متفاجئة','غمزة','غمزة مجنونة'] },
+    { key:'eyebrowType', label:'الحواجب',
+      values:['Angry','AngryNatural','Default','DefaultNatural','FlatNatural','RaisedExcited','SadConcerned','UnibrowNatural','UpDown'],
+      labels:['غاضب','غاضب طبيعي','عادي','عادي طبيعي','مسطح','مرفوع','حزين','حاجب واحد','أعلى وأسفل'] },
+    { key:'mouthType', label:'الفم',
+      values:['Concerned','Default','Disbelief','Eating','Grimace','Sad','ScreamOpen','Serious','Smile','Tongue','Twinkle'],
+      labels:['قلق','عادي','لا مصداقية','آكل','تقطيب','حزين','صارخ','جاد','مبتسم','لسان','لامع'] },
+    { key:'skinColor', label:'لون البشرة', isColor:true, palette:SKIN_COLORS }
+  ]
+};
+
+const DEFAULTS = {
+  male:{
+    topType:'ShortHairShortFlat', hairColor:'BrownDark',
+    facialHairType:'Blank', facialHairColor:'BrownDark',
+    accessoriesType:'Blank',
+    clotheType:'Hoodie', clotheColor:'Blue01',
+    eyeType:'Default', eyebrowType:'Default', mouthType:'Smile',
+    skinColor:'Light', hatColor:'Black'
+  },
+  female:{
+    topType:'LongHairStraight', hairColor:'BrownDark',
+    facialHairType:'Blank', facialHairColor:'BrownDark',
+    accessoriesType:'Blank',
+    clotheType:'Hoodie', clotheColor:'PastelBlue',
+    eyeType:'Default', eyebrowType:'Default', mouthType:'Smile',
+    skinColor:'Light', hatColor:'Black'
   }
+};
 
-  function goStep1() { showStep(1); }
+// ── State ─────────────────────────────────────────────────
+let gender    = null;
+let avConfig  = {};
+let avatarURL = '';
 
-  function goStep2() {
-    const name  = document.getElementById("fullName").value.trim();
-    const age   = document.getElementById("age").value;
-    const email = document.getElementById("email").value.trim();
+function buildAvatarURL(cfg) {
+  const p = new URLSearchParams({
+    avatarStyle:'Circle',
+    topType:         cfg.topType         || 'ShortHairShortFlat',
+    accessoriesType: cfg.accessoriesType || 'Blank',
+    hairColor:       cfg.hairColor       || 'BrownDark',
+    facialHairType:  cfg.facialHairType  || 'Blank',
+    facialHairColor: cfg.facialHairColor || 'BrownDark',
+    clotheType:      cfg.clotheType      || 'Hoodie',
+    clotheColor:     cfg.clotheColor     || 'Blue01',
+    eyeType:         cfg.eyeType         || 'Default',
+    eyebrowType:     cfg.eyebrowType     || 'Default',
+    mouthType:       cfg.mouthType       || 'Smile',
+    skinColor:       cfg.skinColor       || 'Light',
+    hatColor:        cfg.hatColor        || 'Black'
+  });
+  return AVATAR_BASE + '?' + p.toString();
+}
 
-    if (!name)             return UI.toast("Please enter your full name.", "error");
-    if (!age || age < 8)   return UI.toast("Please enter a valid age.", "error");
-    if (!email || !email.includes("@")) return UI.toast("Please enter a valid email.", "error");
+function updatePreview() {
+  avatarURL = buildAvatarURL(avConfig);
+  const img = document.getElementById('mainAvatar');
+  if (img) img.src = avatarURL;
+}
 
-    showStep(2);
-  }
+// ── Gender ─────────────────────────────────────────────────
+function selectGender(g) {
+  gender   = g;
+  avConfig = { ...DEFAULTS[g] };
 
-  function previewPhoto(input) {
-    const file = input.files[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      UI.toast("Photo must be under 5MB.", "error");
-      input.value = "";
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = e => {
-      photoBase64 = e.target.result;
-      const preview = document.getElementById("photoPreview");
-      preview.src   = photoBase64;
-      preview.style.display = "block";
-    };
-    reader.readAsDataURL(file);
-  }
+  document.getElementById('btn-male').classList.toggle('active', g === 'male');
+  document.getElementById('btn-female').classList.toggle('active', g === 'female');
+  document.getElementById('avatarCustomizer').classList.add('show');
+  document.getElementById('avatarStepLabel').textContent = 'خصص الأفاتار بتاعك — التغيير لايف 🎨';
 
-  async function registerNow() {
-    const name  = document.getElementById("fullName").value.trim();
-    const age   = Number(document.getElementById("age").value);
-    const email = document.getElementById("email").value.trim();
-    
-    UI.loader(true, "Creating your account...");
-    
-    // ❌ مش بنبعت الصورة هنا — بنبعتها بعد التسجيل منفصلة
-    const result = await api("register", {
-      full_name: name,
-      age,
-      email,
-      photo_url: ""  // فاضية دلوقتي
-    });
-    
-    UI.loader(false);
-    
-    if (!result.success) {
-      return UI.toast(result.error || "Registration failed.", "error");
-    }
-    
-    // لو في صورة — ابعتها منفصلة بعد التسجيل
-    if (photoBase64 && result.student_id) {
-      await api("update_photo", {
-        student_id: result.student_id,
-        photo_url:  photoBase64
+  renderOptions();
+  updatePreview();
+}
+
+function changeGender() {
+  gender = null;
+  document.getElementById('btn-male').classList.remove('active');
+  document.getElementById('btn-female').classList.remove('active');
+  document.getElementById('avatarCustomizer').classList.remove('show');
+  document.getElementById('avatarStepLabel').textContent = 'اختار جنسك عشان نبدأ نصمم الأفاتار بتاعك 🎨';
+}
+
+// ── Render Options ─────────────────────────────────────────
+function renderOptions() {
+  const wrap = document.getElementById('optionsWrap');
+  wrap.innerHTML = '';
+
+  const sections = OPTIONS[gender] || [];
+  sections.forEach(sec => {
+    const div = document.createElement('div');
+    div.className = 'av-section';
+
+    const title = document.createElement('div');
+    title.className = 'av-section-title';
+    title.textContent = sec.label;
+    div.appendChild(title);
+
+    if (sec.isColor) {
+      // Pure color section (skin)
+      div.appendChild(buildColorPalette(sec.key, sec.palette));
+    } else {
+      // Option buttons
+      const opts = document.createElement('div');
+      opts.className = 'av-opts';
+      sec.values.forEach((val, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'av-opt' + (avConfig[sec.key] === val ? ' active' : '');
+        btn.textContent = sec.labels[i];
+        btn.onclick = () => {
+          avConfig[sec.key] = val;
+          // Reset hat color to default when switching
+          if (sec.key === 'topType') avConfig.hatColor = 'Black';
+          renderOptions();
+          updatePreview();
+        };
+        opts.appendChild(btn);
       });
+      div.appendChild(opts);
+
+      // Color picker for hair / clothe / facialHair
+      if (sec.colorKey === 'hairColor') {
+        const hatTops = ['Hat','WinterHat1','WinterHat2','WinterHat3','WinterHat4','Hijab','Turban','Eyepatch','NoHair'];
+        if (!hatTops.includes(avConfig.topType)) {
+          const clbl = document.createElement('div');
+          clbl.className = 'av-section-title';
+          clbl.style.marginTop = '8px';
+          clbl.textContent = 'لون الشعر';
+          div.appendChild(clbl);
+          div.appendChild(buildColorPalette('hairColor', HAIR_COLORS));
+        }
+      }
+      if (sec.colorKey === 'clotheColor') {
+        const clbl = document.createElement('div');
+        clbl.className = 'av-section-title';
+        clbl.style.marginTop = '8px';
+        clbl.textContent = 'لون الملابس';
+        div.appendChild(clbl);
+        div.appendChild(buildColorPalette('clotheColor', CLOTHE_COLORS));
+      }
+      if (sec.colorKey === 'facialHairColor' && avConfig.facialHairType !== 'Blank') {
+        const clbl = document.createElement('div');
+        clbl.className = 'av-section-title';
+        clbl.style.marginTop = '8px';
+        clbl.textContent = 'لون شعر الوجه';
+        div.appendChild(clbl);
+        div.appendChild(buildColorPalette('facialHairColor', HAIR_COLORS));
+      }
     }
 
-    registeredStudent = result;
+    wrap.appendChild(div);
+  });
+}
 
-    // Save to local storage
-    Auth.save({
-      student_id:          result.student_id,
-      full_name:           name,
-      age,
-      email,
-      photo_url:           photoBase64 || "",
-      total_tokens:        0,
-      season_tokens:       0,
-      golden_tickets:      0,
-      subscription_status: "free",
-      ssr_status:          "none",
-      trial_active:        true,
-      trial_end:           result.trial_end
+function buildColorPalette(key, palette) {
+  const row = document.createElement('div');
+  row.className = 'av-colors';
+  Object.entries(palette).forEach(([name, hex]) => {
+    const dot = document.createElement('div');
+    dot.className = 'av-color' + (avConfig[key] === name ? ' active' : '');
+    dot.style.background = hex;
+    dot.title = name;
+    dot.onclick = () => {
+      avConfig[key] = name;
+      renderOptions();
+      updatePreview();
+    };
+    row.appendChild(dot);
+  });
+  return row;
+}
+
+// ── Steps ──────────────────────────────────────────────────
+function showStep(n) {
+  [1,2,3].forEach(i => {
+    document.getElementById('step'+i).classList.toggle('active', i === n);
+    const dot = document.getElementById('dot'+i);
+    if      (i < n)  { dot.className = 'step-dot done';   dot.textContent = '✓'; }
+    else if (i === n) { dot.className = 'step-dot active'; dot.textContent = i; }
+    else             { dot.className = 'step-dot';         dot.textContent = i; }
+  });
+  document.getElementById('line1').className = 'step-line' + (n > 1 ? ' done' : '');
+  document.getElementById('line2').className = 'step-line' + (n > 2 ? ' done' : '');
+  document.getElementById('loginLinkRow').style.display = n === 3 ? 'none' : 'block';
+}
+
+function goStep1() { showStep(1); }
+
+function goStep2() {
+  const name  = document.getElementById('fullName').value.trim();
+  const age   = document.getElementById('age').value;
+  const email = document.getElementById('email').value.trim();
+  if (!name)                         return UI.toast('Please enter your full name.', 'error');
+  if (!age || Number(age) < 8)       return UI.toast('Please enter a valid age.', 'error');
+  if (!email || !email.includes('@')) return UI.toast('Please enter a valid email.', 'error');
+  showStep(2);
+}
+
+async function goStep3() {
+  const name  = document.getElementById('fullName').value.trim();
+  const age   = Number(document.getElementById('age').value);
+  const email = document.getElementById('email').value.trim();
+
+  // Avatar URL — use default male/female if no gender selected
+  if (!gender) {
+    UI.toast('من فضلك اختار الجنس وصمم الأفاتار بتاعك أولاً 😊', 'warning');
+    return;
+  }
+
+  const finalAvatarURL = avatarURL || buildAvatarURL(DEFAULTS[gender]);
+
+  UI.loader(true, 'Creating your account...');
+  const result = await api('register', { full_name:name, age, email, photo_url:finalAvatarURL });
+  UI.loader(false);
+
+  if (!result.success) return UI.toast(result.error || 'Registration failed.', 'error');
+
+  // Save avatar URL to sheet
+  if (result.student_id && finalAvatarURL) {
+    await api('update_photo', { student_id: result.student_id, photo_url: finalAvatarURL });
+    // Auto-approve avatar (it's generated, not uploaded)
+    await api('admin_auto_approve_avatar', {
+      master_key: CONFIG.ADMIN_KEY,
+      student_id: result.student_id
     });
-
-    // Show credentials
-    document.getElementById("credCode").textContent    = result.code;
-    document.getElementById("credPasskey").textContent  = result.passkey;
-    document.getElementById("credTrial").textContent    =
-      new Date(result.trial_end).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
-
-    showStep(3);
-    document.getElementById("stepsBar").style.display = "none";
   }
 
-  function copyText(elId, btn) {
-    const text = document.getElementById(elId).textContent;
-    navigator.clipboard.writeText(text).then(() => {
-      btn.textContent = "✓ Copied";
-      setTimeout(() => btn.textContent = "Copy", 2000);
-    });
-  }
+  Auth.save({
+    student_id:          result.student_id,
+    full_name:           name, age, email,
+    photo_url:           finalAvatarURL,
+    photo_status:        'approved', // avatar auto-approved
+    total_tokens:        0, season_tokens:0, golden_tickets:0,
+    subscription_status: 'free', ssr_status:'none',
+    trial_active:        true, trial_end:result.trial_end,
+    ai_warnings:         0
+  });
 
-  function goToDashboard() {
-    window.location.href = CONFIG.PAGES.DASHBOARD;
-  }
+  // Show success
+  document.getElementById('credCode').textContent    = result.code;
+  document.getElementById('credPasskey').textContent = result.passkey;
+  document.getElementById('credTrial').textContent   =
+    new Date(result.trial_end).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+  document.getElementById('successAvatar').src = finalAvatarURL;
+
+  document.getElementById('stepsBar').style.display = 'none';
+  showStep(3);
+}
+
+function copyText(elId, btn) {
+  navigator.clipboard.writeText(document.getElementById(elId).textContent).then(() => {
+    btn.textContent = '✓ Copied';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+function goToDashboard() { window.location.href = CONFIG.PAGES.DASHBOARD; }
+
+// ── Init: show preview avatars on gender buttons ───────────
+window.addEventListener('load', () => {
+  document.getElementById('prev-male').src =
+    buildAvatarURL(DEFAULTS.male);
+  document.getElementById('prev-female').src =
+    buildAvatarURL({...DEFAULTS.female, topType:'LongHairCurly', clotheColor:'PastelBlue'});
+});
 </script>
 </body>
 </html>
