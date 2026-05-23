@@ -5,7 +5,7 @@
 // ============================================================
 
 const CONFIG = {
-  API_URL: "https://script.google.com/macros/s/AKfycbxwbza1noo999fcMlvmHd4va7jLKWaRZ1p7bW1WZyiGcJp_jPoLgBicdJ40eYFr1H_3lQ/exec",
+  API_URL: "https://script.google.com/macros/s/AKfycbzsFKNE8X9cGPKFZjxj4xSdxasm0wyfYAObTNFlZM968WRPTyTayAqCSg0FYih7LFItYw/exec",
 
   DRIVE: {
     DICTATION_UPLOADS:    "https://drive.google.com/drive/folders/100SuODMhM1nEf3Dmm1dUec9VmeSj8ENm",
