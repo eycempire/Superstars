@@ -1,70 +1,144 @@
 // ============================================================
-// SUPERSTARS — config.js | EYC Empire
+// SUPERSTARS — config.js v2.0 | EYC Empire
+// Midnight Pro Theme
 // GET-based API to bypass CORS (Google Apps Script limitation)
 // ============================================================
 
 const CONFIG = {
-  API_URL: "https://script.google.com/macros/s/AKfycbydzLGF3Dnit9QCZ0oMNVSHONqmungPTKzCl9ryAA7IWLsSVBeYbVXBl8BNgrHXST5Glw/exec",
+  API_URL: "https://script.google.com/macros/s/AKfycbxwbza1noo999fcMlvmHd4va7jLKWaRZ1p7bW1WZyiGcJp_jPoLgBicdJ40eYFr1H_3lQ/exec",
+
   DRIVE: {
-    DICTATION_UPLOADS:   "https://drive.google.com/drive/folders/100SuODMhM1nEf3Dmm1dUec9VmeSj8ENm",
-    ELMAGAZINE_UPLOADS:  "https://drive.google.com/drive/folders/18t8_bkWGM1nEf3Dmm1dUec9VmeSj8ENm",
-    SINGSANGSUNG_UPLOADS:"https://drive.google.com/drive/folders/SING_SANG_SUNG_FOLDER_ID",
-    DATA_ROOT:           "https://drive.google.com/drive/folders/DATA_ROOT_FOLDER_ID"
+    DICTATION_UPLOADS:    "https://drive.google.com/drive/folders/100SuODMhM1nEf3Dmm1dUec9VmeSj8ENm",
+    ELMAGAZINE_UPLOADS:   "https://drive.google.com/drive/folders/18t8_bkWGM1nEf3Dmm1dUec9VmeSj8ENm",
+    SINGSANGSUNG_UPLOADS: "https://drive.google.com/drive/folders/1dF6bPlQFww1DmfV-StKpYd4RJlXekRb1",
+    DATA_ROOT:            "https://drive.google.com/drive/folders/1JO6ZRzlARNEt9tNQqKHyrTd-CBybSwwW"
   },
-  SEASON: { ID:"S01", NAME:"Season 1", START_DATE:"2025-06-01", END_DATE:"2025-06-30" },
-  TOKENS_PER_TICKET: 3000, TRIAL_DAYS: 14, SUB_COST_TICKETS: 3, SSR_COST_TICKETS: 1,
+
+  SEASON: {
+    ID:         "S01",
+    NAME:       "Season 1",
+    START_DATE: "2025-06-01",
+    END_DATE:   "2025-06-30"
+  },
+
+  TOKENS_PER_TICKET:  3000,
+  TRIAL_DAYS:         14,
+  SUB_COST_TICKETS:   3,
+  SSR_COST_TICKETS:   1,
+
   TOKENS: {
-    Grammar:40, GrammarX:60, Alike:40, AlikeX:60, Label:40, LabelX:60,
-    GoldenEar:50, GoldenEarX:70, Figurative:50, FigurativeX:70,
-    Seeds:60, SeedsX:80, Vivid:60, VividX:80, Dictation:70, DictationX:90,
-    ElMagazine:70, ElMagazineX:90, SingSangSung:60, SingSangSungX:100
+    Grammar:      40,  GrammarX:      60,
+    Alike:        40,  AlikeX:        60,
+    Label:        40,  LabelX:        60,
+    GoldenEar:    50,  GoldenEarX:    70,
+    Figurative:   50,  FigurativeX:   70,
+    Seeds:        60,  SeedsX:        80,
+    Vivid:        60,  VividX:        80,
+    Dictation:    70,  DictationX:    90,
+    ElMagazine:   70,  ElMagazineX:   90,
+    SingSangSung: 60,  SingSangSungX: 100
   },
-  FREE_ACTIVITIES: ["Grammar","Alike","Label","GoldenEar","Figurative","SingSangSung"],
-  PARTIAL_FREE:    ["Seeds","Vivid","Dictation","ElMagazine"],
-  LOCKED_ACTIVITIES: ["GrammarX","AlikeX","LabelX","GoldenEarX","FigurativeX",
-    "SeedsX","VividX","DictationX","ElMagazineX","SingSangSungX"],
+
+  FREE_ACTIVITIES:    ["Grammar","Alike","Label","GoldenEar","Figurative","SingSangSung"],
+  PARTIAL_FREE:       ["Seeds","Vivid","Dictation","ElMagazine"],
+  LOCKED_ACTIVITIES:  [
+    "GrammarX","AlikeX","LabelX","GoldenEarX","FigurativeX",
+    "SeedsX","VividX","DictationX","ElMagazineX","SingSangSungX"
+  ],
+
   ACTIVITY_NAMES: {
-    Grammar:"Grammar", GrammarX:"Grammar X", Alike:"Alike", AlikeX:"Alike X",
-    Seeds:"Seeds", SeedsX:"Seeds X", Vivid:"Vivid", VividX:"Vivid X",
-    Figurative:"Figurative", FigurativeX:"Figurative X",
+    Grammar:"Grammar",         GrammarX:"Grammar X",
+    Alike:"Alike",             AlikeX:"Alike X",
+    Seeds:"Seeds",             SeedsX:"Seeds X",
+    Vivid:"Vivid",             VividX:"Vivid X",
+    Figurative:"Figurative",   FigurativeX:"Figurative X",
     SingSangSung:"Sing Sang Sung", SingSangSungX:"Sing Sang Sung X",
-    ElMagazine:"El-Magazine", ElMagazineX:"El-Magazine X",
-    Label:"Label", LabelX:"Label X", GoldenEar:"Golden Ear",
-    GoldenEarX:"Golden Ear X", Dictation:"Dictation", DictationX:"Dictation X"
+    ElMagazine:"El-Magazine",  ElMagazineX:"El-Magazine X",
+    Label:"Label",             LabelX:"Label X",
+    GoldenEar:"Golden Ear",    GoldenEarX:"Golden Ear X",
+    Dictation:"Dictation",     DictationX:"Dictation X"
   },
+
   ACTIVITY_ICONS: {
-    Grammar:"📝",GrammarX:"📝",Alike:"👂",AlikeX:"👂",Seeds:"🌱",SeedsX:"🌱",
-    Vivid:"🖼️",VividX:"🖼️",Figurative:"💬",FigurativeX:"💬",
-    SingSangSung:"🎵",SingSangSungX:"🎵",ElMagazine:"🎙️",ElMagazineX:"🎙️",
-    Label:"🏷️",LabelX:"🏷️",GoldenEar:"👂",GoldenEarX:"👂",Dictation:"✍️",DictationX:"✍️"
+    Grammar:"📝",   GrammarX:"📝",
+    Alike:"👂",     AlikeX:"👂",
+    Seeds:"🌱",     SeedsX:"🌱",
+    Vivid:"🖼️",    VividX:"🖼️",
+    Figurative:"💬",FigurativeX:"💬",
+    SingSangSung:"🎵",SingSangSungX:"🎵",
+    ElMagazine:"🎙️",ElMagazineX:"🎙️",
+    Label:"🏷️",    LabelX:"🏷️",
+    GoldenEar:"👂", GoldenEarX:"👂",
+    Dictation:"✍️", DictationX:"✍️"
   },
+
+  // ── Submit action names — fixed ──────────────────────────
+  // كل activity عندها action محدد بدل الـ string manipulation
+  SUBMIT_ACTIONS: {
+    Grammar:      "submit_grammar",
+    GrammarX:     "submit_grammarx",
+    Alike:        "submit_alike",
+    AlikeX:       "submit_alikex",
+    Seeds:        "submit_seeds",
+    SeedsX:       "submit_seedsx",
+    Vivid:        "submit_vivid",
+    VividX:       "submit_vividx",
+    Figurative:   "submit_figurative",
+    FigurativeX:  "submit_figurativex",
+    Label:        "submit_label",
+    LabelX:       "submit_labelx",
+    GoldenEar:    "submit_goldenear",
+    GoldenEarX:   "submit_goldenearx",
+    Dictation:    "submit_dictation",
+    DictationX:   "submit_dictationx",
+    ElMagazine:   "submit_elmagazine",
+    ElMagazineX:  "submit_elmagazinex",
+    SingSangSung: "submit_singsangsung",
+    SingSangSungX:"submit_singsangsungx"
+  },
+
   PAGES: {
-    LANDING:"index.html", SIGNUP:"signup.html", LOGIN:"login.html",
-    DASHBOARD:"dashboard.html", ACTIVITY:"activity.html",
-    LEADERBOARD:"leaderboard.html", SHOP:"shop.html", ADMIN:"admin.html"
+    LANDING:     "index.html",
+    SIGNUP:      "signup.html",
+    LOGIN:       "login.html",
+    DASHBOARD:   "dashboard.html",
+    ACTIVITY:    "activity.html",
+    LEADERBOARD: "leaderboard.html",
+    SHOP:        "shop.html",
+    ADMIN:       "admin.html"
   },
+
   ADMIN_KEY:  "EYC_ADMIN_2025",
-  MILESTONES: [3000,6000,9000,12000,15000],
-  SOCIAL_EXB: { TOKENS_PER_LIKE:2, TOKENS_PER_SHARE:5 }
+  MILESTONES: [3000, 6000, 9000, 12000, 15000],
+
+  SOCIAL_EXB: {
+    TOKENS_PER_LIKE:  2,
+    TOKENS_PER_SHARE: 5
+  },
+
+  // ── Async activities — نتيجتها مش فورية ─────────────────
+  ASYNC_ACTIVITIES: [
+    "Dictation","DictationX",
+    "ElMagazine","ElMagazineX",
+    "SingSangSung","SingSangSungX"
+  ]
 };
 
 // ============================================================
-// API — Uses GET to avoid CORS preflight error
-// Google Apps Script blocks POST from external origins
-// Solution: send all data as URL-encoded GET parameter
+// API — GET to avoid CORS preflight
 // ============================================================
 async function api(action, payload = {}) {
   try {
     const body = JSON.stringify({ action, ...payload });
     const url  = CONFIG.API_URL + "?data=" + encodeURIComponent(body);
-    const res  = await fetch(url, { method:"GET", redirect:"follow" });
+    const res  = await fetch(url, { method: "GET", redirect: "follow" });
     const text = await res.text();
     const s = text.indexOf("{"), e = text.lastIndexOf("}");
-    if (s === -1) throw new Error("Bad response: " + text.slice(0,100));
+    if (s === -1) throw new Error("Bad response: " + text.slice(0, 100));
     return JSON.parse(text.slice(s, e + 1));
   } catch (err) {
     console.error("API Error:", err);
-    return { success:false, error:"Network error. Please try again." };
+    return { success: false, error: "Network error. Please try again." };
   }
 }
 
@@ -72,53 +146,139 @@ async function api(action, payload = {}) {
 // AUTH
 // ============================================================
 const Auth = {
-  save(s)   { localStorage.setItem("ss_student", JSON.stringify(s)); },
-  get()     { try { return JSON.parse(localStorage.getItem("ss_student")); } catch { return null; } },
-  clear()   { localStorage.removeItem("ss_student"); },
-  require() { const s = this.get(); if (!s) { window.location.href = CONFIG.PAGES.LOGIN; return null; } return s; },
-  isAdmin() { return localStorage.getItem("ss_admin_key") === CONFIG.ADMIN_KEY; },
-  saveAdmin(){ localStorage.setItem("ss_admin_key", CONFIG.ADMIN_KEY); }
+  save(s)    { localStorage.setItem("ss_student", JSON.stringify(s)); },
+  get()      {
+    try { return JSON.parse(localStorage.getItem("ss_student")); }
+    catch { return null; }
+  },
+  clear()    { localStorage.removeItem("ss_student"); },
+  require()  {
+    const s = this.get();
+    if (!s) { window.location.href = CONFIG.PAGES.LOGIN; return null; }
+    return s;
+  },
+  isAdmin()  { return localStorage.getItem("ss_admin_key") === CONFIG.ADMIN_KEY; },
+  saveAdmin(){ localStorage.setItem("ss_admin_key", CONFIG.ADMIN_KEY); },
+
+  // تحديث بيانات الـ student في الـ localStorage
+  update(updates) {
+    const s = this.get();
+    if (!s) return;
+    this.save({ ...s, ...updates });
+    return { ...s, ...updates };
+  }
+};
+
+// ============================================================
+// STREAK — نظام الـ daily streak
+// ============================================================
+const Streak = {
+  KEY: "ss_streak",
+
+  get() {
+    try {
+      const data = JSON.parse(localStorage.getItem(this.KEY));
+      if (!data) return { count: 0, lastDate: null };
+      return data;
+    } catch { return { count: 0, lastDate: null }; }
+  },
+
+  // بيتعمل كال لما الـ student يكمل task
+  increment() {
+    const today = new Date().toDateString();
+    const data  = this.get();
+
+    if (data.lastDate === today) {
+      // نفس اليوم — مش بيزيد
+      return data.count;
+    }
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const isConsecutive = data.lastDate === yesterday.toDateString();
+
+    const newCount = isConsecutive ? data.count + 1 : 1;
+    localStorage.setItem(this.KEY, JSON.stringify({ count: newCount, lastDate: today }));
+    return newCount;
+  },
+
+  // بيتحقق لو انكسر الـ streak
+  check() {
+    const data = this.get();
+    if (!data.lastDate) return 0;
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    // لو آخر يوم مش امبارح ولا النهارده — الـ streak انكسر
+    if (data.lastDate !== yesterday.toDateString() &&
+        data.lastDate !== new Date().toDateString()) {
+      localStorage.setItem(this.KEY, JSON.stringify({ count: 0, lastDate: null }));
+      return 0;
+    }
+    return data.count;
+  }
 };
 
 // ============================================================
 // UI
 // ============================================================
 const UI = {
-  toast(message, type="info", duration=3500) {
-    const existing = document.getElementById("ss-toast");
-    if (existing) existing.remove();
-    const colors = { info:"#3B82F6", success:"#10B981", error:"#EF4444", warning:"#F59E0B" };
-    const t = document.createElement("div");
-    t.id = "ss-toast";
-    t.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
-      background:${colors[type]||colors.info};color:#fff;padding:12px 24px;border-radius:12px;
-      font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:9999;
-      transition:transform .3s cubic-bezier(.34,1.56,.64,1);max-width:90vw;text-align:center;font-family:sans-serif;`;
-    t.textContent = message;
-    document.body.appendChild(t);
-    requestAnimationFrame(() => { t.style.transform = "translateX(-50%) translateY(0)"; });
-    setTimeout(() => { t.style.transform = "translateX(-50%) translateY(80px)"; setTimeout(() => t.remove(), 300); }, duration);
+  toast(message, type = "info", duration = 3500) {
+    // شيل الـ toast القديم لو موجود
+    document.getElementById("ss-toast-wrap")?.remove();
+
+    const colors = { info: "info", success: "success", error: "error", warning: "warning" };
+    const wrap = document.createElement("div");
+    wrap.id = "ss-toast-wrap";
+    wrap.className = "ss-toast-wrap";
+    wrap.innerHTML = `<div class="ss-toast ${colors[type] || 'info'}">${message}</div>`;
+    document.body.appendChild(wrap);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => wrap.classList.add("show"));
+    });
+
+    setTimeout(() => {
+      wrap.classList.remove("show");
+      setTimeout(() => wrap.remove(), 350);
+    }, duration);
   },
-  loader(show, message="Loading...") {
+
+  loader(show, message = "Loading...") {
     let el = document.getElementById("ss-loader");
     if (show) {
       if (!el) {
-        el = document.createElement("div"); el.id = "ss-loader";
-        el.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);
-          display:flex;align-items:center;justify-content:center;z-index:9998;flex-direction:column;gap:16px;`;
-        el.innerHTML = `<div style="width:48px;height:48px;border:3px solid rgba(255,255,255,.2);
-          border-top-color:#FFD700;border-radius:50%;animation:ss-spin .8s linear infinite;"></div>
-          <p style="color:#fff;font-size:14px;font-weight:500;font-family:sans-serif;">${message}</p>
-          <style>@keyframes ss-spin{to{transform:rotate(360deg)}}</style>`;
+        el = document.createElement("div");
+        el.id = "ss-loader";
+        el.style.cssText = `
+          position:fixed;inset:0;
+          background:rgba(13,17,23,0.75);
+          backdrop-filter:blur(6px);
+          display:flex;align-items:center;justify-content:center;
+          z-index:9998;flex-direction:column;gap:16px;
+        `;
+        el.innerHTML = `
+          <div class="spinner"></div>
+          <p style="color:var(--text-secondary);font-size:14px;font-weight:500;">${message}</p>
+        `;
         document.body.appendChild(el);
       }
-    } else { if (el) el.remove(); }
+    } else {
+      el?.remove();
+    }
   },
-  formatTokens(n) { return n >= 1000 ? (n/1000).toFixed(1)+"K" : String(n); },
+
+  formatTokens(n) {
+    if (n >= 1000) return (n / 1000).toFixed(1) + "K";
+    return String(n);
+  },
+
   timeUntil(d) {
-    const diff = new Date(d) - new Date(); if (diff <= 0) return "Now";
-    const D=Math.floor(diff/86400000), H=Math.floor((diff%86400000)/3600000), M=Math.floor((diff%3600000)/60000);
-    return D>0 ? `${D}d ${H}h` : H>0 ? `${H}h ${M}m` : `${M}m`;
+    const diff = new Date(d) - new Date();
+    if (diff <= 0) return "Now";
+    const D = Math.floor(diff / 86400000);
+    const H = Math.floor((diff % 86400000) / 3600000);
+    const M = Math.floor((diff % 3600000) / 60000);
+    return D > 0 ? `${D}d ${H}h` : H > 0 ? `${H}h ${M}m` : `${M}m`;
   }
 };
 
@@ -132,6 +292,20 @@ const ActivityHelper = {
     if (student.subscription_status === "subscribed") return true;
     return CONFIG.FREE_ACTIVITIES.includes(name);
   },
-  isFirstTaskFree(name, num) { return CONFIG.PARTIAL_FREE.includes(name) && Number(num)===1; },
-  getMaxTokens(name)         { return CONFIG.TOKENS[name] || 0; }
+
+  isFirstTaskFree(name, num) {
+    return CONFIG.PARTIAL_FREE.includes(name) && Number(num) === 1;
+  },
+
+  getMaxTokens(name) {
+    return CONFIG.TOKENS[name] || 0;
+  },
+
+  getSubmitAction(name) {
+    return CONFIG.SUBMIT_ACTIONS[name] || `submit_${name.toLowerCase()}`;
+  },
+
+  isAsync(name) {
+    return CONFIG.ASYNC_ACTIVITIES.includes(name);
+  }
 };
