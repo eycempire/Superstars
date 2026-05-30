@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تحكم شموسة</title>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script src="nav.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:   #F2EDE6; --cream2: #E8E0D5; --border: #D8CFCA;
+  --gold:    #C9A84C; --gold-pale: #F7F0DC; --gold-light: #E8CFA0;
+  --charcoal:#2A2018; --dark: #1A1210; --muted: #8A7A6A;
+  --warm:    #6B5F58; --surface: #FFFFFF;
+  --green:   #4A8A48; --red: #B04A3A; --blue: #3A6AB0;
+  --sidebar-w: 220px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Tajawal',sans-serif;background:var(--cream);color:var(--charcoal);direction:rtl;display:flex;min-height:100vh;}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:var(--charcoal);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;right:0;bottom:0;
+  z-index:50;overflow-y:auto;
+}
+.sidebar-logo{
+  padding:1.5rem 1.2rem 1rem;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  margin-bottom:.5rem;
+}
+.sidebar-logo-name{font-family:'Amiri',serif;font-size:22px;color:var(--gold);}
+.sidebar-logo-sub{font-size:11px;color:var(--muted);letter-spacing:.08em;}
+.nav-section{padding:.5rem 0;}
+.nav-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);padding:.4rem 1.2rem .3rem;opacity:.6;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:.65rem 1.2rem;
+  font-size:13px;color:#B0A890;
+  cursor:pointer;transition:all .15s;
+  border-right:2px solid transparent;
+}
+.nav-item:hover{color:var(--cream);background:rgba(255,255,255,.04);}
+.nav-item.active{color:var(--gold);border-right-color:var(--gold);background:rgba(201,168,76,.08);}
+.nav-icon{font-size:16px;width:18px;text-align:center;}
+.nav-badge{margin-right:auto;background:var(--red);color:#fff;font-size:10px;padding:1px 7px;border-radius:10px;}
+
+.sidebar-footer{
+  margin-top:auto;padding:1rem 1.2rem;
+  border-top:1px solid rgba(255,255,255,.06);
+  font-size:12px;color:var(--muted);
+}
+.sidebar-footer strong{color:var(--gold-light);display:block;margin-bottom:2px;}
+
+/* ══ MAIN ══ */
+.main{margin-right:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+
+/* ══ TOPBAR ══ */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:rgba(242,237,230,.95);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);
+  padding:.9rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.topbar-title{font-size:18px;font-weight:700;color:var(--charcoal);}
+.topbar-title span{color:var(--gold);}
+.topbar-actions{display:flex;gap:8px;align-items:center;}
+.tba-btn{
+  padding:7px 16px;border-radius:4px;border:1px solid var(--border);
+  background:var(--surface);color:var(--charcoal);
+  font-size:13px;cursor:pointer;font-family:'Tajawal',sans-serif;
+  transition:all .15s;
+}
+.tba-btn:hover{border-color:var(--gold);color:var(--gold);}
+.tba-btn.primary{background:var(--charcoal);color:var(--gold-light);border-color:var(--charcoal);}
+.tba-btn.primary:hover{background:var(--dark);}
+
+/* ══ CONTENT ══ */
+.content{padding:2rem;flex:1;}
+
+/* ══ STAT CARDS ══ */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:2rem;}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.2rem;transition:box-shadow .2s;cursor:default;
+}
+.stat-card:hover{box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.stat-card-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
+.stat-card-num{font-size:30px;font-weight:700;color:var(--charcoal);font-family:'Amiri',serif;line-height:1;}
+.stat-card-sub{font-size:12px;color:var(--muted);margin-top:.3rem;}
+.stat-card-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;margin-top:.5rem;}
+.badge-up{background:#EAF5E8;color:var(--green);}
+.badge-new{background:rgba(201,168,76,.12);color:var(--gold);}
+
+/* ══ SECTIONS GRID ══ */
+.sections-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.panel-header{
+  padding:.9rem 1.2rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.panel-title{font-size:14px;font-weight:700;}
+.panel-action{font-size:12px;color:var(--gold);cursor:pointer;border:none;background:none;font-family:'Tajawal',sans-serif;}
+.panel-action:hover{text-decoration:underline;}
+
+/* Orders */
+.order-item{
+  padding:.9rem 1.2rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.order-item:last-child{border-bottom:none;}
+.order-avatar{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--gold-pale);color:var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:13px;flex-shrink:0;
+}
+.order-info{flex:1;min-width:0;}
+.order-name{font-size:13px;font-weight:600;color:var(--charcoal);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.order-novel{font-size:12px;color:var(--muted);}
+.order-actions{display:flex;gap:6px;flex-shrink:0;}
+.wa-btn{
+  display:flex;align-items:center;gap:5px;
+  background:#25D366;color:#fff;border:none;
+  padding:5px 10px;border-radius:4px;font-size:12px;
+  cursor:pointer;font-family:'Tajawal',sans-serif;
+  transition:filter .15s;white-space:nowrap;
+}
+.wa-btn:hover{filter:brightness(1.1);}
+.icon-btn{
+  width:28px;height:28px;border-radius:4px;
+  border:1px solid var(--border);background:var(--cream);
+  color:var(--muted);cursor:pointer;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.icon-btn:hover{border-color:var(--red);color:var(--red);}
+.status-dot{
+  width:7px;height:7px;border-radius:50%;flex-shrink:0;
+}
+.dot-new{background:var(--gold);}
+.dot-done{background:var(--green);}
+
+/* Comments */
+.comment-item{
+  padding:.9rem 1.2rem;border-bottom:1px solid var(--border);
+}
+.comment-item:last-child{border-bottom:none;}
+.comment-meta{display:flex;align-items:center;gap:8px;margin-bottom:.4rem;flex-wrap:wrap;}
+.comment-author{font-size:13px;font-weight:600;}
+.comment-target{font-size:11px;color:var(--muted);background:var(--cream2);padding:2px 8px;border-radius:3px;}
+.comment-date{font-size:11px;color:var(--muted);margin-right:auto;}
+.comment-body-text{font-size:13px;color:var(--charcoal);line-height:1.6;margin-bottom:.6rem;}
+.comment-actions{display:flex;gap:6px;}
+.c-btn{
+  font-size:11px;padding:3px 10px;border-radius:3px;border:1px solid var(--border);
+  background:transparent;cursor:pointer;font-family:'Tajawal',sans-serif;
+  transition:all .15s;
+}
+.c-btn.approve{color:var(--green);border-color:rgba(74,138,72,.3);}
+.c-btn.approve:hover{background:#EAF5E8;}
+.c-btn.delete{color:var(--red);border-color:rgba(176,74,58,.3);}
+.c-btn.delete:hover{background:#FAECEA;}
+
+/* Users */
+.user-item{
+  padding:.8rem 1.2rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.user-item:last-child{border-bottom:none;}
+.user-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--cream2);color:var(--warm);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;flex-shrink:0;
+}
+.user-info{flex:1;}
+.user-name{font-size:13px;font-weight:600;}
+.user-email{font-size:11px;color:var(--muted);}
+.user-status{font-size:11px;padding:2px 8px;border-radius:10px;}
+.status-active{background:#EAF5E8;color:var(--green);}
+.status-banned{background:#FAECEA;color:var(--red);}
+.ban-btn{
+  font-size:11px;padding:4px 10px;border-radius:4px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted);cursor:pointer;font-family:'Tajawal',sans-serif;
+  transition:all .15s;
+}
+.ban-btn:hover{border-color:var(--red);color:var(--red);}
+.ban-btn.unban:hover{border-color:var(--green);color:var(--green);}
+
+/* Novels quick */
+.novel-row{
+  padding:.8rem 1.2rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.novel-row:last-child{border-bottom:none;}
+.novel-thumb{
+  width:36px;height:52px;border-radius:3px;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--gold-light);font-family:'Amiri',serif;
+  text-align:center;line-height:1.2;
+}
+.thumb-1{background:linear-gradient(145deg,#3A3230,#1E1815);}
+.thumb-2{background:linear-gradient(145deg,#6B4A3A,#3A2820);}
+.novel-row-info{flex:1;}
+.novel-row-title{font-size:13px;font-weight:600;}
+.novel-row-meta{font-size:11px;color:var(--muted);}
+.novel-row-actions{display:flex;gap:5px;}
+
+/* Quick write */
+.quick-write{padding:1.2rem;}
+.quick-write-input{
+  width:100%;padding:.8rem 1rem;
+  border:1px solid var(--border);border-radius:6px;
+  background:var(--cream);font-family:'Tajawal',sans-serif;
+  font-size:14px;color:var(--charcoal);direction:rtl;
+  resize:none;outline:none;margin-bottom:.8rem;
+  transition:border-color .2s;
+}
+.quick-write-input:focus{border-color:var(--gold);}
+.quick-write-footer{display:flex;justify-content:space-between;align-items:center;}
+.quick-write-type{
+  display:flex;gap:6px;
+}
+.type-pill{
+  font-size:11px;padding:4px 10px;border-radius:12px;
+  border:1px solid var(--border);background:transparent;
+  cursor:pointer;font-family:'Tajawal',sans-serif;color:var(--muted);
+  transition:all .15s;
+}
+.type-pill.on{background:var(--gold-pale);border-color:var(--gold);color:var(--charcoal);}
+
+/* ══ MODAL ══ */
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(26,18,16,.5);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;
+  padding:1rem;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--surface);border-radius:10px;
+  width:100%;max-width:560px;
+  border:1px solid var(--border);
+  box-shadow:0 20px 60px rgba(0,0,0,.15);
+}
+.modal-header{
+  padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.modal-title{font-size:16px;font-weight:700;}
+.modal-close{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;}
+.modal-body{padding:1.5rem;}
+.form-group{margin-bottom:1.2rem;}
+.form-label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:.4rem;display:block;letter-spacing:.05em;}
+.form-input{
+  width:100%;padding:.7rem 1rem;
+  border:1px solid var(--border);border-radius:6px;
+  background:var(--cream);font-family:'Tajawal',sans-serif;
+  font-size:14px;color:var(--charcoal);direction:rtl;outline:none;
+  transition:border-color .2s;
+}
+.form-input:focus{border-color:var(--gold);}
+.form-input[type="number"]{direction:ltr;text-align:left;}
+.modal-footer{
+  padding:1rem 1.5rem;border-top:1px solid var(--border);
+  display:flex;gap:8px;justify-content:flex-left;
+}
+
+/* ══ AUTH GUARD ══ */
+document.addEventListener('DOMContentLoaded', function() {
+
+  // Show loading overlay until auth state is confirmed
+  var overlay = document.getElementById('authLoadingOverlay');
+
+  if (typeof AUTH === 'undefined' || typeof CONFIG === 'undefined') {
+    // Scripts not loaded — redirect
+    window.location.href = 'shammosah_home.html';
+    return;
+  }
+
+  // Inject nav
+  if (typeof NAV !== 'undefined') NAV.inject('#nav-root');
+
+  // Wait for Firebase auth state (fires once on load)
+  AUTH.onChange(function(user, isAdmin) {
+    if (!isAdmin) {
+      // Not admin → redirect
+      window.location.replace(CONFIG.pages.home);
+      return;
+    }
+    // Is admin → hide overlay and show page
+    if (overlay) overlay.style.display = 'none';
+  });
+
+  // Safety timeout: if auth takes > 5s, check session cache
+  setTimeout(function() {
+    // Only redirect if we're SURE user is not admin
+    // (don't redirect if Firebase is still loading)
+    var session = AUTH.getSession();
+    if (session && session.isAdmin) {
+      // Session confirms admin — show page
+      if (overlay) overlay.style.display = 'none';
+    } else if (!session) {
+      // No session at all after 8s → definitely not logged in
+      window.location.replace(CONFIG.pages.home);
+    }
+    // If session exists but isAdmin=false → onChange already handled it
+  }, 8000);
+
+});
+
+/* ══ TOAST ══ */
+.toast{
+  position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(10px);
+  background:var(--charcoal);color:var(--cream);
+  padding:10px 20px;border-radius:6px;font-size:13px;
+  opacity:0;transition:all .3s;z-index:999;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ══ ADMIN VIEWS ══ */
+.admin-view { animation: fadeInView .2s ease; }
+@keyframes fadeInView {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile */
+@media(max-width:768px){
+  .sidebar{width:200px;transform:translateX(100%);transition:transform .3s;}
+  .sidebar.mobile-open{transform:translateX(0);}
+  .main{margin-right:0;}
+  .sections-grid{grid-template-columns:1fr;}
+  .content{padding:1rem;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<div id="nav-root"></div>
+
+<!-- ══ AUTH LOADING OVERLAY ══ -->
+<div id="authLoadingOverlay" style="
+  position:fixed;inset:0;z-index:9999;
+  background:#1A1210;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:1rem;
+">
+  <div style="font-family:'Amiri',serif;font-size:28px;color:#C9A84C;">شموسة</div>
+  <div style="font-size:13px;color:#6B5F58;letter-spacing:.1em;">جاري التحقق من الصلاحيات...</div>
+  <div style="
+    width:40px;height:40px;border-radius:50%;
+    border:3px solid rgba(201,168,76,.2);
+    border-top-color:#C9A84C;
+    animation:spin .8s linear infinite;
+  "></div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+</div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-name">شموسة</div>
+    <div class="sidebar-logo-sub">لوحة التحكم</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">الرئيسي</div>
+    <div class="nav-item active" onclick="setPage('dashboard',this)">
+      <span class="nav-icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="setPage('orders',this)">
+      <span class="nav-icon">🛒</span> طلبات الشراء
+      <span class="nav-badge">٣</span>
+    </div>
+    <div class="nav-item" onclick="setPage('comments',this)">
+      <span class="nav-icon">💬</span> التعليقات
+      <span class="nav-badge">٧</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">المحتوى</div>
+    <div class="nav-item" onclick="setPage('novels',this)">
+      <span class="nav-icon">📚</span> الروايات
+    </div>
+    <div class="nav-item" onclick="setPage('blog',this)">
+      <span class="nav-icon">✍️</span> المدونة
+    </div>
+    <div class="nav-item" onclick="setPage('media',this)">
+      <span class="nav-icon">🎵</span> صوت وصورة
+    </div>
+    <div class="nav-item" onclick="setPage('events',this)">
+      <span class="nav-icon">🗓️</span> المعارض
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">الإدارة</div>
+    <div class="nav-item" onclick="setPage('users',this)">
+      <span class="nav-icon">👥</span> المستخدمون
+    </div>
+    <div class="nav-item" onclick="setPage('newsletter',this)">
+      <span class="nav-icon">📧</span> النشرة البريدية
+    </div>
+    <div class="nav-item" onclick="setPage('press',this)">
+      <span class="nav-icon">📰</span> طلبات الصحافة
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <strong>شيماء يسري شموسة</strong>
+    مسجلة دخول · Admin
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="pageTitle">Dashboard <span>·</span> اليوم</div>
+    <div class="topbar-actions">
+      <button class="tba-btn" onclick="openModal('novel')">+ رواية جديدة</button>
+      <button class="tba-btn primary" onclick="openModal('post')">✍️ مقال جديد</button>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+
+    <!-- ══ VIEW: DASHBOARD ══ -->
+    <div class="admin-view" id="view-dashboard">
+
+    <!-- ══ STATS ══ -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card-label">زوار اليوم</div>
+        <div class="stat-card-num">٢٨٤</div>
+        <span class="stat-card-badge badge-up">↑ ١٢٪ من أمس</span>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">طلبات شراء جديدة</div>
+        <div class="stat-card-num">٣</div>
+        <span class="stat-card-badge badge-new">تحتاج رد</span>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">تعليقات جديدة</div>
+        <div class="stat-card-num">٧</div>
+        <span class="stat-card-badge badge-new">تحتاج مراجعة</span>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">مشتركو النشرة</div>
+        <div class="stat-card-num">٤١٢</div>
+        <span class="stat-card-badge badge-up">↑ ٨ هذا الأسبوع</span>
+      </div>
+    </div>
+
+    <!-- ══ PANELS ══ -->
+    <div class="sections-grid">
+
+      <!-- Orders -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">🛒 طلبات الشراء</div>
+          <button class="panel-action" onclick="setPage('orders',document.querySelector('[onclick*=\"orders\"]'))">عرض الكل</button>
+        </div>
+        <div id="ordersList">
+          <div class="order-item">
+            <div class="status-dot dot-new"></div>
+            <div class="order-avatar">أ</div>
+            <div class="order-info">
+              <div class="order-name">أحمد محمود السيد</div>
+              <div class="order-novel">موسم القرنفل · 01012345678</div>
+            </div>
+            <div class="order-actions">
+              <button class="wa-btn" onclick="openWA('01012345678','أحمد','موسم القرنفل','150')">واتساب</button>
+              <button class="icon-btn" onclick="deleteOrder(this)" title="حذف">✕</button>
+            </div>
+          </div>
+          <div class="order-item">
+            <div class="status-dot dot-new"></div>
+            <div class="order-avatar">م</div>
+            <div class="order-info">
+              <div class="order-name">منى عبد الرحمن</div>
+              <div class="order-novel">أيام الملح والتوت · 01098765432</div>
+            </div>
+            <div class="order-actions">
+              <button class="wa-btn" onclick="openWA('01098765432','منى','أيام الملح والتوت','120')">واتساب</button>
+              <button class="icon-btn" onclick="deleteOrder(this)" title="حذف">✕</button>
+            </div>
+          </div>
+          <div class="order-item">
+            <div class="status-dot dot-new"></div>
+            <div class="order-avatar">ف</div>
+            <div class="order-info">
+              <div class="order-name">فاطمة الزهراء</div>
+              <div class="order-novel">موسم القرنفل · 00966501234567</div>
+            </div>
+            <div class="order-actions">
+              <button class="wa-btn" onclick="openWA('00966501234567','فاطمة','موسم القرنفل','150')">واتساب</button>
+              <button class="icon-btn" onclick="deleteOrder(this)" title="حذف">✕</button>
+            </div>
+          </div>
+          <div class="order-item">
+            <div class="status-dot dot-done"></div>
+            <div class="order-avatar">ك</div>
+            <div class="order-info">
+              <div class="order-name">خالد الشمري</div>
+              <div class="order-novel">موسم القرنفل · تم التواصل ✓</div>
+            </div>
+            <div class="order-actions">
+              <button class="icon-btn" onclick="deleteOrder(this)" title="حذف">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">💬 تعليقات جديدة</div>
+          <button class="panel-action" onclick="setPage('comments',document.querySelector('[onclick*=\"comments\"]'))">عرض الكل</button>
+        </div>
+        <div id="commentsList">
+          <div class="comment-item">
+            <div class="comment-meta">
+              <span class="comment-author">منى السيد</span>
+              <span class="comment-target">الفصل ٣ — موسم القرنفل</span>
+              <span class="comment-date">منذ ساعتين</span>
+            </div>
+            <div class="comment-body-text">مشهد العودة ده من أجمل اللي قرأته. شموسة بتكتب الروح!</div>
+            <div class="comment-actions">
+              <button class="c-btn approve" onclick="approveComment(this)">✓ موافقة</button>
+              <button class="c-btn delete" onclick="deleteComment(this)">حذف</button>
+            </div>
+          </div>
+          <div class="comment-item">
+            <div class="comment-meta">
+              <span class="comment-author">رانيا عبدالله</span>
+              <span class="comment-target">مقال — الكتابة والزمن</span>
+              <span class="comment-date">منذ ٥ ساعات</span>
+            </div>
+            <div class="comment-body-text">القرنفل في الرواية مش مجرد نبتة، ده رمز كامل 🌸</div>
+            <div class="comment-actions">
+              <button class="c-btn approve" onclick="approveComment(this)">✓ موافقة</button>
+              <button class="c-btn delete" onclick="deleteComment(this)">حذف</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">👥 المستخدمون</div>
+          <button class="panel-action" onclick="setPage('users',document.querySelector('[onclick*=\"users\"]'))">عرض الكل</button>
+        </div>
+        <div id="usersList">
+          <div class="user-item">
+            <div class="user-avatar">أ</div>
+            <div class="user-info">
+              <div class="user-name">أحمد محمود</div>
+              <div class="user-email">ahmed@gmail.com</div>
+            </div>
+            <span class="user-status status-active">نشط</span>
+            <button class="ban-btn" onclick="toggleBan(this)">إيقاف</button>
+          </div>
+          <div class="user-item">
+            <div class="user-avatar">م</div>
+            <div class="user-info">
+              <div class="user-name">منى السيد</div>
+              <div class="user-email">mona@gmail.com</div>
+            </div>
+            <span class="user-status status-active">نشط</span>
+            <button class="ban-btn" onclick="toggleBan(this)">إيقاف</button>
+          </div>
+          <div class="user-item">
+            <div class="user-avatar">س</div>
+            <div class="user-info">
+              <div class="user-name">سعيد ×××</div>
+              <div class="user-email">s@gmail.com</div>
+            </div>
+            <span class="user-status status-banned">موقوف</span>
+            <button class="ban-btn unban" onclick="toggleBan(this)">إعادة تفعيل</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick write -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">✍️ نشر سريع</div>
+        </div>
+        <div class="quick-write">
+          <div class="quick-write-type" style="margin-bottom:.8rem">
+            <button class="type-pill on" onclick="setType(this)">مقال</button>
+            <button class="type-pill" onclick="setType(this)">خاطرة</button>
+            <button class="type-pill" onclick="setType(this)">إعلان</button>
+            <button class="type-pill" onclick="setType(this)">فصل</button>
+          </div>
+          <textarea class="quick-write-input" rows="4" placeholder="اكتبي هنا... سينشر مباشرة على الموقع"></textarea>
+          <div class="quick-write-footer">
+            <div style="display:flex;gap:6px">
+              <button class="tba-btn" style="font-size:12px;padding:5px 12px">معاينة</button>
+              <button class="tba-btn primary" style="font-size:12px;padding:5px 12px" onclick="quickPublish()">نشر الآن</button>
+            </div>
+            <div style="font-size:11px;color:var(--muted)" id="charCount">٠ حرف</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </div><!-- /view-dashboard -->
+
+    <!-- ══ VIEW: ORDERS ══ -->
+    <div class="admin-view" id="view-orders" style="display:none">
+      <div class="panel" style="max-width:700px">
+        <div class="panel-header">
+          <div class="panel-title">🛒 كل طلبات الشراء</div>
+          <span style="font-size:12px;color:var(--muted)">بيتحدث تلقائياً من Firestore</span>
+        </div>
+        <div id="allOrdersList">
+          <div class="order-item">
+            <div class="status-dot dot-new"></div>
+            <div class="order-avatar">أ</div>
+            <div class="order-info">
+              <div class="order-name">أحمد محمود السيد</div>
+              <div class="order-novel">موسم القرنفل · 01012345678</div>
+            </div>
+            <div class="order-actions">
+              <button class="wa-btn" onclick="openWA('01012345678','أحمد','موسم القرنفل','150')">واتساب</button>
+              <button class="icon-btn" onclick="deleteOrder(this)">✕</button>
+            </div>
+          </div>
+          <div class="order-item">
+            <div class="status-dot dot-new"></div>
+            <div class="order-avatar">م</div>
+            <div class="order-info">
+              <div class="order-name">منى عبد الرحمن</div>
+              <div class="order-novel">أيام الملح والتوت · 01098765432</div>
+            </div>
+            <div class="order-actions">
+              <button class="wa-btn" onclick="openWA('01098765432','منى','أيام الملح والتوت','120')">واتساب</button>
+              <button class="icon-btn" onclick="deleteOrder(this)">✕</button>
+            </div>
+          </div>
+          <div class="order-item">
+            <div class="status-dot dot-done"></div>
+            <div class="order-avatar">ك</div>
+            <div class="order-info">
+              <div class="order-name">خالد الشمري</div>
+              <div class="order-novel">موسم القرنفل · تم التواصل ✓</div>
+            </div>
+            <div class="order-actions">
+              <button class="icon-btn" onclick="deleteOrder(this)">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /view-orders -->
+
+    <!-- ══ VIEW: COMMENTS ══ -->
+    <div class="admin-view" id="view-comments" style="display:none">
+      <div class="panel" style="max-width:700px">
+        <div class="panel-header">
+          <div class="panel-title">💬 كل التعليقات</div>
+          <span style="font-size:12px;color:var(--muted)">تنتظر الموافقة</span>
+        </div>
+        <div id="allCommentsList">
+          <div class="comment-item">
+            <div class="comment-meta">
+              <span class="comment-author">منى السيد</span>
+              <span class="comment-target">الفصل ٣ — موسم القرنفل</span>
+              <span class="comment-date">منذ ساعتين</span>
+            </div>
+            <div class="comment-body-text">مشهد العودة ده من أجمل اللي قرأته. شموسة بتكتب الروح!</div>
+            <div class="comment-actions">
+              <button class="c-btn approve" onclick="approveComment(this)">✓ موافقة</button>
+              <button class="c-btn delete" onclick="deleteComment(this)">حذف</button>
+            </div>
+          </div>
+          <div class="comment-item">
+            <div class="comment-meta">
+              <span class="comment-author">رانيا عبدالله</span>
+              <span class="comment-target">مقال — الكتابة والزمن</span>
+              <span class="comment-date">منذ ٥ ساعات</span>
+            </div>
+            <div class="comment-body-text">القرنفل في الرواية مش مجرد نبتة، ده رمز كامل 🌸</div>
+            <div class="comment-actions">
+              <button class="c-btn approve" onclick="approveComment(this)">✓ موافقة</button>
+              <button class="c-btn delete" onclick="deleteComment(this)">حذف</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /view-comments -->
+
+    <!-- ══ VIEW: NOVELS ══ -->
+    <div class="admin-view" id="view-novels" style="display:none">
+      <div class="sections-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">📚 الروايات المنشورة</div>
+            <button class="panel-action" onclick="openModal('novel')">+ رواية جديدة</button>
+          </div>
+          <div class="novel-row">
+            <div class="novel-thumb thumb-1">موسم القرنفل</div>
+            <div class="novel-row-info">
+              <div class="novel-row-title">موسم القرنفل</div>
+              <div class="novel-row-meta">٨ فصول · ١٥٠ جنيه · ٢٠٢٣</div>
+            </div>
+            <div class="novel-row-actions">
+              <button class="tba-btn" style="font-size:11px;padding:4px 10px" onclick="showToast('تعديل الرواية')">تعديل</button>
+            </div>
+          </div>
+          <div class="novel-row">
+            <div class="novel-thumb thumb-2">أيام الملح</div>
+            <div class="novel-row-info">
+              <div class="novel-row-title">أيام الملح والتوت</div>
+              <div class="novel-row-meta">٦ فصول · ١٢٠ جنيه · ٢٠٢٢</div>
+            </div>
+            <div class="novel-row-actions">
+              <button class="tba-btn" style="font-size:11px;padding:4px 10px" onclick="showToast('تعديل الرواية')">تعديل</button>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">✍️ نشر رواية جديدة</div>
+          </div>
+          <div style="padding:1.2rem">
+            <button class="tba-btn primary" style="width:100%" onclick="openModal('novel')">+ إضافة رواية جديدة</button>
+            <p style="font-size:12px;color:var(--muted);margin-top:.8rem;line-height:1.7">
+              بعد الإضافة، الرواية بتظهر فوراً في المتجر وصفحة الروايات.
+              الفصل الأول بيكون مجاني تلقائياً.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div><!-- /view-novels -->
+
+    <!-- ══ VIEW: BLOG ══ -->
+    <div class="admin-view" id="view-blog" style="display:none">
+      <div class="panel" style="max-width:700px">
+        <div class="panel-header">
+          <div class="panel-title">✍️ مقالات المدونة</div>
+          <button class="panel-action" onclick="openModal('post')">+ مقال جديد</button>
+        </div>
+        <div style="padding:1.2rem;display:flex;flex-direction:column;gap:10px">
+          <div style="padding:.8rem;border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size:14px;font-weight:600">لماذا أكتب وأنا خائفة في كل مرة؟</div>
+              <div style="font-size:11px;color:var(--muted)">١٥ مايو ٢٠٢٥ · ❤ ٢١٤</div>
+            </div>
+            <button class="tba-btn" style="font-size:11px;padding:4px 10px" onclick="showToast('تعديل المقال')">تعديل</button>
+          </div>
+          <div style="padding:.8rem;border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size:14px;font-weight:600">رسالة إلى من يقرأني في الليل</div>
+              <div style="font-size:11px;color:var(--muted)">٢٠ أبريل ٢٠٢٥ · ❤ ٢٣٠</div>
+            </div>
+            <button class="tba-btn" style="font-size:11px;padding:4px 10px" onclick="showToast('تعديل المقال')">تعديل</button>
+          </div>
+          <button class="tba-btn primary" onclick="openModal('post')">✍️ كتابة مقال جديد</button>
+        </div>
+      </div>
+    </div><!-- /view-blog -->
+
+    <!-- ══ VIEW: USERS ══ -->
+    <div class="admin-view" id="view-users" style="display:none">
+      <div class="panel" style="max-width:700px">
+        <div class="panel-header">
+          <div class="panel-title">👥 إدارة المستخدمين</div>
+          <span style="font-size:12px;color:var(--muted)" id="usersCount">٣ مستخدمين</span>
+        </div>
+        <div id="allUsersList">
+          <div class="user-item">
+            <div class="user-avatar">أ</div>
+            <div class="user-info">
+              <div class="user-name">أحمد محمود</div>
+              <div class="user-email">ahmed@gmail.com</div>
+            </div>
+            <span class="user-status status-active">نشط</span>
+            <button class="ban-btn" onclick="toggleBan(this)">إيقاف</button>
+          </div>
+          <div class="user-item">
+            <div class="user-avatar">م</div>
+            <div class="user-info">
+              <div class="user-name">منى السيد</div>
+              <div class="user-email">mona@gmail.com</div>
+            </div>
+            <span class="user-status status-active">نشط</span>
+            <button class="ban-btn" onclick="toggleBan(this)">إيقاف</button>
+          </div>
+          <div class="user-item">
+            <div class="user-avatar">س</div>
+            <div class="user-info">
+              <div class="user-name">سعيد ×××</div>
+              <div class="user-email">s@gmail.com</div>
+            </div>
+            <span class="user-status status-banned">موقوف</span>
+            <button class="ban-btn unban" onclick="toggleBan(this)">إعادة تفعيل</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /view-users -->
+
+    <!-- ══ VIEW: NEWSLETTER ══ -->
+    <div class="admin-view" id="view-newsletter" style="display:none">
+      <div class="sections-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">📧 المشتركون في النشرة</div>
+            <span style="font-size:12px;color:var(--muted)">٤١٢ مشترك</span>
+          </div>
+          <div style="padding:1.2rem">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="padding:.6rem .8rem;background:var(--cream2);border-radius:5px;font-size:13px;display:flex;justify-content:space-between">
+                <span>ahmed@gmail.com</span><span style="font-size:11px;color:var(--muted)">من الرئيسية</span>
+              </div>
+              <div style="padding:.6rem .8rem;background:var(--cream2);border-radius:5px;font-size:13px;display:flex;justify-content:space-between">
+                <span>mona@example.com</span><span style="font-size:11px;color:var(--muted)">من البلوج</span>
+              </div>
+              <div style="padding:.6rem .8rem;background:var(--cream2);border-radius:5px;font-size:13px;display:flex;justify-content:space-between">
+                <span>rania@gmail.com</span><span style="font-size:11px;color:var(--muted)">من المعارض</span>
+              </div>
+              <p style="font-size:11px;color:var(--muted);margin-top:.4rem">+ ٤٠٩ مشتركين آخرين</p>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">📤 إرسال نشرة جديدة</div>
+          </div>
+          <div style="padding:1.2rem">
+            <div class="form-group">
+              <label class="form-label">عنوان النشرة</label>
+              <input type="text" class="form-input" placeholder="مثال: فصل جديد نزل!">
+            </div>
+            <div class="form-group">
+              <label class="form-label">نص الرسالة</label>
+              <textarea class="form-input" rows="4" placeholder="محتوى النشرة البريدية..."></textarea>
+            </div>
+            <button class="tba-btn primary" style="width:100%" onclick="showToast('✓ تم إرسال النشرة لـ ٤١٢ مشترك')">📤 إرسال للجميع</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /view-newsletter -->
+
+    <!-- ══ VIEW: PRESS ══ -->
+    <div class="admin-view" id="view-press" style="display:none">
+      <div class="panel" style="max-width:700px">
+        <div class="panel-header">
+          <div class="panel-title">📰 طلبات الصحافة والمقابلات</div>
+          <span style="font-size:12px;color:var(--muted)">١ طلب جديد</span>
+        </div>
+        <div style="padding:1.2rem;display:flex;flex-direction:column;gap:10px">
+          <div style="padding:1rem;border:1px solid var(--border);border-radius:6px;border-right:3px solid var(--gold)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+              <strong style="font-size:14px">محمد العمري — مجلة القاهرة الثقافية</strong>
+              <span style="font-size:10px;background:var(--gold-pale);color:var(--gold);padding:2px 8px;border-radius:10px">جديد</span>
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:.5rem">مقابلة مكتوبة · يناير ٢٠٢٥</div>
+            <div style="font-size:13px;color:var(--warm);margin-bottom:.8rem">يريد مقابلة عن مسيرتك الأدبية وتجربة معرض القاهرة.</div>
+            <div style="display:flex;gap:8px">
+              <button class="wa-btn" onclick="showToast('فتح واتساب مع محمد العمري')">واتساب</button>
+              <button class="tba-btn" style="font-size:12px;padding:5px 12px" onclick="showToast('تم وضع علامة مراجعة')">تأجيل</button>
+            </div>
+          </div>
+          <div style="padding:1rem;border:1px solid var(--border);border-radius:6px;opacity:.6">
+            <div style="font-size:14px;font-weight:600;margin-bottom:.3rem">سارة الحسيني — Radio Nile</div>
+            <div style="font-size:12px;color:var(--muted)">بودكاست · ديسمبر ٢٠٢٤ · تم الرد ✓</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /view-press -->
+
+    <!-- ══ VIEW: MEDIA ══ -->
+    <div class="admin-view" id="view-media" style="display:none">
+      <div class="panel" style="max-width:700px">
+        <div class="panel-header">
+          <div class="panel-title">🎵 صوت وصورة</div>
+          <button class="panel-action" onclick="showToast('رفع محتوى جديد')">+ رفع</button>
+        </div>
+        <div style="padding:1.2rem">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.7">
+            المحتوى الصوتي والمرئي بيتحكّم فيه من صفحة صوت وصورة مباشرة.
+            الـ SoundCloud بيتزامن تلقائياً من حساب شيماء.
+          </p>
+          <a href="shammosah_media.html" target="_blank" class="tba-btn primary" style="display:inline-block;text-decoration:none">
+            فتح صفحة صوت وصورة ←
+          </a>
+        </div>
+      </div>
+    </div><!-- /view-media -->
+
+    <!-- ══ VIEW: EVENTS ══ -->
+    <div class="admin-view" id="view-events" style="display:none">
+      <div class="panel" style="max-width:700px">
+        <div class="panel-header">
+          <div class="panel-title">🗓️ المعارض والأحداث</div>
+          <button class="panel-action" onclick="showToast('إضافة حدث جديد')">+ حدث جديد</button>
+        </div>
+        <div style="padding:1.2rem;display:flex;flex-direction:column;gap:8px">
+          <div style="padding:.8rem;border:1px solid rgba(111,201,138,.3);background:rgba(111,201,138,.05);border-radius:6px">
+            <div style="font-size:13px;font-weight:700;color:#4A8A48">📅 قادم — معرض الرياض · أكتوبر ٢٠٢٥</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">المملكة العربية السعودية · غير مؤكد بعد</div>
+          </div>
+          <div style="padding:.8rem;border:1px solid var(--border);background:var(--cream2);border-radius:6px">
+            <div style="font-size:13px;font-weight:600">معرض القاهرة · يناير ٢٠٢٤</div>
+            <div style="font-size:11px;color:var(--muted)">مصر · حضور سابق ✓</div>
+          </div>
+          <div style="padding:.8rem;border:1px solid var(--border);background:var(--cream2);border-radius:6px">
+            <div style="font-size:13px;font-weight:600">معرض الدوحة · نوفمبر ٢٠٢٣</div>
+            <div style="font-size:11px;color:var(--muted)">قطر · حضور سابق ✓</div>
+          </div>
+          <button class="tba-btn primary" onclick="showToast('إضافة حدث جديد قريباً')">+ إضافة معرض أو حدث</button>
+        </div>
+      </div>
+    </div><!-- /view-events -->
+
+  </div><!-- /content -->
+</div>
+
+<!-- ══ MODAL: رواية جديدة ══ -->
+<div class="modal-overlay" id="novelModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📚 إضافة رواية جديدة</div>
+      <button class="modal-close" onclick="closeModal('novel')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">اسم الرواية</label>
+        <input type="text" class="form-input" placeholder="مثال: موسم القرنفل">
+      </div>
+      <div class="form-group">
+        <label class="form-label">الوصف القصير</label>
+        <textarea class="form-input" rows="3" placeholder="وصف قصير يظهر في بطاقة الرواية"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label class="form-label">السعر (جنيه)</label>
+          <input type="number" class="form-input" placeholder="150">
+        </div>
+        <div class="form-group">
+          <label class="form-label">رابط الشراء الخارجي</label>
+          <input type="url" class="form-input" placeholder="https://..." style="direction:ltr">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">صورة الغلاف</label>
+        <input type="file" class="form-input" accept="image/*" style="padding:.5rem">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="tba-btn primary" onclick="saveNovel()">✓ حفظ ونشر</button>
+      <button class="tba-btn" onclick="closeModal('novel')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: مقال جديد ══ -->
+<div class="modal-overlay" id="postModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✍️ مقال جديد</div>
+      <button class="modal-close" onclick="closeModal('post')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">عنوان المقال</label>
+        <input type="text" class="form-input" placeholder="عنوان المقال أو الخاطرة">
+      </div>
+      <div class="form-group">
+        <label class="form-label">المحتوى</label>
+        <textarea class="form-input" rows="8" placeholder="اكتبي المقال هنا..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">صورة المقال (اختياري)</label>
+        <input type="file" class="form-input" accept="image/*" style="padding:.5rem">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="tba-btn primary" onclick="savePost()">✓ نشر الآن</button>
+      <button class="tba-btn" onclick="closeModal('post')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══ AUTH GUARD ══ */
+document.addEventListener('DOMContentLoaded', function() {
+
+  // Show loading overlay until auth state is confirmed
+  var overlay = document.getElementById('authLoadingOverlay');
+
+  if (typeof AUTH === 'undefined' || typeof CONFIG === 'undefined') {
+    // Scripts not loaded — redirect
+    window.location.href = 'shammosah_home.html';
+    return;
+  }
+
+  // Inject nav
+  if (typeof NAV !== 'undefined') NAV.inject('#nav-root');
+
+  // Wait for Firebase auth state (fires once on load)
+  AUTH.onChange(function(user, isAdmin) {
+    if (!isAdmin) {
+      // Not admin → redirect
+      window.location.replace(CONFIG.pages.home);
+      return;
+    }
+    // Is admin → hide overlay and show page
+    if (overlay) overlay.style.display = 'none';
+  });
+
+  // Safety timeout: if auth takes > 5s, check session cache
+  setTimeout(function() {
+    // Only redirect if we're SURE user is not admin
+    // (don't redirect if Firebase is still loading)
+    var session = AUTH.getSession();
+    if (session && session.isAdmin) {
+      // Session confirms admin — show page
+      if (overlay) overlay.style.display = 'none';
+    } else if (!session) {
+      // No session at all after 8s → definitely not logged in
+      window.location.replace(CONFIG.pages.home);
+    }
+    // If session exists but isAdmin=false → onChange already handled it
+  }, 8000);
+
+});
+
+/* ══ TOAST ══ */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ══ NAV & VIEWS ══ */
+const PAGE_TITLES = {
+  dashboard: 'Dashboard · اليوم',
+  orders:    'طلبات الشراء',
+  comments:  'التعليقات',
+  novels:    'الروايات',
+  blog:      'المدونة',
+  media:     'صوت وصورة',
+  events:    'المعارض والأحداث',
+  users:     'المستخدمون',
+  newsletter:'النشرة البريدية',
+  press:     'طلبات الصحافة',
+};
+
+function setPage(page, el) {
+  // update sidebar active state
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+
+  // update topbar title
+  document.getElementById('pageTitle').innerHTML =
+    `${PAGE_TITLES[page] || page} <span>·</span> شموسة`;
+
+  // hide all views, show the right one
+  document.querySelectorAll('.admin-view').forEach(v => v.style.display = 'none');
+  const target = document.getElementById('view-' + page);
+  if (target) {
+    target.style.display = 'block';
+  } else {
+    // fallback: show dashboard
+    const dash = document.getElementById('view-dashboard');
+    if (dash) dash.style.display = 'block';
+    showToast('هذا القسم قيد التطوير');
+  }
+}
+
+/* ══ MODALS ══ */
+function openModal(type) {
+  document.getElementById(type + 'Modal').classList.add('open');
+}
+function closeModal(type) {
+  document.getElementById(type + 'Modal').classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+/* ══ WHATSAPP ══ */
+function openWA(phone, name, novel, price) {
+  const msg = `أهلاً ${name} 🌙\nشكراً لطلبك رواية "${novel}"\nالسعر: ${price} جنيه\nهنتفق على طريقة الدفع والشحن بإذن الله 💛`;
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+  showToast('✓ تم فتح واتساب مع ' + name);
+}
+
+/* ══ ORDERS ══ */
+function deleteOrder(btn) {
+  if (confirm('حذف هذا الطلب؟')) {
+    btn.closest('.order-item').style.opacity = '0';
+    setTimeout(() => btn.closest('.order-item').remove(), 300);
+    showToast('تم حذف الطلب');
+  }
+}
+
+/* ══ COMMENTS ══ */
+function approveComment(btn) {
+  const item = btn.closest('.comment-item');
+  item.style.background = 'rgba(74,138,72,.05)';
+  btn.textContent = '✓ تمت الموافقة';
+  btn.disabled = true;
+  showToast('✓ تمت الموافقة على التعليق');
+}
+function deleteComment(btn) {
+  if (confirm('حذف هذا التعليق؟')) {
+    btn.closest('.comment-item').style.opacity = '0';
+    setTimeout(() => btn.closest('.comment-item').remove(), 300);
+    showToast('تم حذف التعليق');
+  }
+}
+
+/* ══ USERS ══ */
+function toggleBan(btn) {
+  const statusEl = btn.previousElementSibling;
+  const isBanned = statusEl.classList.contains('status-banned');
+  if (isBanned) {
+    statusEl.className = 'user-status status-active';
+    statusEl.textContent = 'نشط';
+    btn.textContent = 'إيقاف';
+    btn.className = 'ban-btn';
+    showToast('✓ تم إعادة تفعيل الحساب');
+  } else {
+    statusEl.className = 'user-status status-banned';
+    statusEl.textContent = 'موقوف';
+    btn.textContent = 'إعادة تفعيل';
+    btn.className = 'ban-btn unban';
+    showToast('⚠ تم إيقاف الحساب');
+  }
+}
+
+/* ══ QUICK WRITE ══ */
+function setType(btn) {
+  document.querySelectorAll('.type-pill').forEach(p => p.classList.remove('on'));
+  btn.classList.add('on');
+}
+document.querySelector('.quick-write-input').addEventListener('input', function() {
+  document.getElementById('charCount').textContent = this.value.length + ' حرف';
+});
+function quickPublish() {
+  const ta = document.querySelector('.quick-write-input');
+  if (ta.value.trim()) {
+    showToast('✓ تم النشر على الموقع مباشرة');
+    ta.value = '';
+    document.getElementById('charCount').textContent = '٠ حرف';
+  } else {
+    showToast('اكتبي المحتوى أولاً');
+  }
+}
+
+/* ══ SAVE MODAL ══ */
+function saveNovel() {
+  closeModal('novel');
+  showToast('✓ تم نشر الرواية على الموقع');
+}
+function savePost() {
+  closeModal('post');
+  showToast('✓ تم نشر المقال — سيصل إشعار للمشتركين');
+}
+</script>
+</body>
+</html>
