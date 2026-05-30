@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Dashboard — Superstars</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/theme.css">
 <script src="config.js"></script>
 <style>
@@ -75,7 +75,9 @@
   transition: var(--transition-fast); flex-shrink: 0;
   overflow: hidden;
 }
-.nav-avatar:hover { border-color: var(--blue-border); }
+.nav-avatar { animation: avatarGlow 3s ease-in-out infinite; }
+@keyframes avatarGlow { 0%,100%{ box-shadow:0 0 6px rgba(56,189,248,0.3); } 50%{ box-shadow:0 0 14px rgba(56,189,248,0.6); } }
+.nav-avatar:hover { border-color: var(--blue); transform: scale(1.08); }
 .nav-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
 /* ── Bottom Nav ───────────────────────────────────────────── */
@@ -350,7 +352,7 @@
 }
 .profile-avatar-wrap { position: relative; flex-shrink: 0; }
 .profile-avatar {
-  width: 80px; height: 80px; border-radius: 50%;
+  width: 86px; height: 86px; border-radius: 50%; animation: avatarGlow 3s ease-in-out infinite;
   border: 2px solid var(--blue-border);
   background: var(--bg-overlay);
   display: flex; align-items: center; justify-content: center;
@@ -462,6 +464,15 @@
 }
 @media (max-width: 400px) {
   .activities-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── Global text cut fix ─────────────────────────────────── */
+html, body { min-height: 100%; }
+.main, .page, main {
+  padding-bottom: max(80px, calc(var(--bottom-nav-h, 68px) + 20px)) !important;
+}
+@media (min-width: 769px) {
+  .main, .page, main { padding-bottom: 40px !important; }
 }
 </style>
 </head>
@@ -771,7 +782,7 @@ function renderNav() {
   document.getElementById('heroName').textContent      = (student.full_name || '').split(' ')[0];
 
   // ✅ FIX: بنتحقق من photo_status قبل ما نعرض الصورة
-  if (student.photo_url && student.photo_status === 'approved') {
+  if (student.photo_url) {
     const avatar = document.getElementById('navAvatar');
     avatar.innerHTML = `<img src="${student.photo_url}" alt="">`;
   }
@@ -1031,7 +1042,7 @@ function renderProfilePanel() {
 
   // ✅ FIX: photo_status check قبل عرض الصورة
   const avatar = document.getElementById('profileAvatar');
-  if (student.photo_url && student.photo_status === 'approved') {
+  if (student.photo_url) {
     avatar.innerHTML = `<img src="${student.photo_url}" alt="">`;
   } else {
     avatar.textContent = '👤';
@@ -1058,11 +1069,6 @@ function renderProfilePanel() {
   });
 
   // ✅ FIX: photo pending badge
-  if (student.photo_url && student.photo_status === 'pending') {
-    const el = document.createElement('div');
-    el.className = 'profile-tag';
-    el.textContent = '🕐 Photo Pending';
-    tags.appendChild(el);
   }
 
   if ((student.ai_warnings || 0) > 0) {
@@ -1102,103 +1108,3 @@ async function submitNewPhoto() {
     UI.loader(false);
     if (result.success) {
       // ✅ FIX: تحديث photo_status في الـ localStorage
-      student = Auth.update({ photo_url: e.target.result, photo_status: 'pending' });
-      UI.toast('Photo submitted for admin approval! 📸', 'success');
-      renderProfilePanel();
-    } else {
-      UI.toast(result.error || 'Upload failed.', 'error');
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-// ── SSR ────────────────────────────────────────────────────
-function renderSSRPanel() {
-  const ssrStatus = document.getElementById('ssrStatus');
-  const ssrDesc   = document.getElementById('ssrDesc');
-  const ssrBtn    = document.getElementById('ssrBtn');
-  if (student.ssr_status === 'active') {
-    ssrStatus.textContent = '📊 SSR Reporter — Active ✅';
-    ssrDesc.textContent   = 'Detailed correction reports available after every task this season.';
-    ssrBtn.textContent    = '✅ Active';
-    ssrBtn.style.opacity  = '.5';
-    ssrBtn.onclick        = null;
-  }
-}
-
-async function subscribeSSR() {
-  if ((student.golden_tickets || 0) < CONFIG.SSR_COST_TICKETS) {
-    UI.toast('Not enough Golden Tickets. Visit the Shop!', 'warning');
-    setTimeout(() => window.location.href = CONFIG.PAGES.SHOP, 1200);
-    return;
-  }
-  UI.loader(true, 'Activating SSR...');
-  const result = await api('spend_tickets', { student_id: student.student_id, item_type: 'ssr' });
-  UI.loader(false);
-  if (result.success) {
-    student = Auth.update({
-      ssr_status:     'active',
-      golden_tickets: (student.golden_tickets || 0) - CONFIG.SSR_COST_TICKETS
-    });
-    renderNav();
-    renderSSRPanel();
-    UI.toast('SSR Reporter activated! 📊', 'success');
-  } else {
-    UI.toast(result.error || 'Activation failed.', 'error');
-  }
-}
-
-// ── Leaderboard ────────────────────────────────────────────
-async function loadLeaderboard(type, btn) {
-  if (btn) {
-    document.querySelectorAll('#panel-leaderboard .filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  }
-
-  const list = document.getElementById('lbList');
-  list.innerHTML = '<div class="loading-wrap"><div class="spinner"></div></div>';
-
-  const result = await api('get_leaderboard', { student_id: student.student_id, type });
-  if (!result.success) {
-    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">Failed to load rankings.</div>';
-    return;
-  }
-
-  const items = result.leaderboard || [];
-  list.innerHTML = '';
-
-  items.forEach((s, idx) => {
-    const rank    = idx + 1;
-    const isMe    = s.student_id === student.student_id;
-    if (isMe && type === 'season') {
-      seasonRank = rank;
-      document.getElementById('heroRank').textContent = '#' + rank;
-    }
-
-    const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
-    const rankCls   = rank === 1 ? 'r1' : rank === 2 ? 'r2' : rank === 3 ? 'r3' : '';
-
-    const item = document.createElement('div');
-    item.className = 'lb-item' + (isMe ? ' me' : '');
-    item.innerHTML = `
-      <div class="lb-rank ${rankCls}">${rankEmoji}</div>
-      <div class="lb-avatar">${s.photo_url ? `<img src="${s.photo_url}" alt="">` : '👤'}</div>
-      <div class="lb-name">${s.full_name}${isMe ? ' <span style="color:var(--blue);font-size:10px;">(you)</span>' : ''}</div>
-      <div class="lb-tokens">⚡ ${(s.tokens || 0).toLocaleString()}</div>
-    `;
-    list.appendChild(item);
-  });
-
-  if (!items.length) {
-    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">No rankings yet. Be the first!</div>';
-  }
-}
-
-// ── Logout ─────────────────────────────────────────────────
-function logout() {
-  Auth.clear();
-  window.location.href = CONFIG.PAGES.LOGIN;
-}
-</script>
-</body>
-</html>

@@ -5,218 +5,133 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Join Superstars — EYC Empire</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/theme.css">
 <script src="config.js"></script>
 <style>
-body {
-  min-height:100vh; display:flex; align-items:center;
-  justify-content:center; padding:24px 16px;
-  position:relative; overflow-x:hidden;
-}
-body::before {
-  content:''; position:fixed; inset:0;
-  background-image:
-    linear-gradient(rgba(56,189,248,0.025) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(56,189,248,0.025) 1px,transparent 1px);
-  background-size:40px 40px; pointer-events:none;
-}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;position:relative;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(56,189,248,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,0.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
 .orb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;opacity:.35}
 .orb-1{width:400px;height:400px;background:radial-gradient(circle,rgba(56,189,248,0.25),transparent);top:-100px;right:-100px;animation:float 8s ease-in-out infinite}
 .orb-2{width:300px;height:300px;background:radial-gradient(circle,rgba(167,139,250,0.2),transparent);bottom:-80px;left:-80px;animation:float 10s ease-in-out infinite reverse}
 @keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-20px)}}
 
-.card{
-  background:var(--bg-surface);border:1px solid var(--border-subtle);
-  border-radius:24px;padding:36px 32px;
-  width:100%;max-width:480px;
-  position:relative;box-shadow:var(--shadow-lg);animation:fadeUp .4s ease;
-}
-.card::before{
-  content:'';position:absolute;top:0;left:10%;right:10%;height:2px;
-  background:linear-gradient(90deg,transparent,var(--blue),transparent);border-radius:2px;
-}
+.card{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:24px;padding:36px 32px;width:100%;max-width:500px;position:relative;box-shadow:var(--shadow-lg);animation:fadeUp .4s ease}
+.card::before{content:'';position:absolute;top:0;left:10%;right:10%;height:2px;background:linear-gradient(90deg,transparent,var(--blue),transparent);border-radius:2px}
 
-/* Logo */
-.logo{text-align:center;margin-bottom:24px}
-.logo-badge{
-  display:inline-flex;align-items:center;gap:8px;
-  background:var(--blue-dim);border:1px solid var(--blue-border);
-  border-radius:var(--radius-full);padding:6px 16px;margin-bottom:12px;
-}
+.logo{text-align:center;margin-bottom:22px}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:var(--radius-full);padding:6px 16px;margin-bottom:10px}
 .logo-badge span{font-size:11px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;font-weight:600}
-.logo h1{font-family:var(--font-display);font-size:44px;letter-spacing:3px;color:var(--text-primary);line-height:1;margin-bottom:6px}
+.logo h1{font-family:var(--font-display);font-size:42px;letter-spacing:3px;color:var(--text-primary);line-height:1;margin-bottom:5px}
 .logo h1 .acc{color:var(--blue)}
 .logo p{font-size:13px;color:var(--text-muted)}
 
-/* Steps indicator */
-.steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:24px}
-.step-dot{
-  width:28px;height:28px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:12px;font-weight:600;
-  border:2px solid var(--border-subtle);
-  color:var(--text-muted);background:var(--bg-overlay);
-  transition:var(--transition-base);position:relative;z-index:1;
-}
+/* Steps */
+.steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:22px}
+.step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;border:2px solid var(--border-subtle);color:var(--text-muted);background:var(--bg-overlay);transition:var(--transition-base);position:relative;z-index:1}
 .step-dot.active{border-color:var(--blue);color:#0D1117;background:var(--blue)}
 .step-dot.done{border-color:var(--green);color:var(--green);background:var(--green-dim)}
 .step-line{width:48px;height:2px;background:var(--border-subtle);transition:background .3s}
 .step-line.done{background:var(--green)}
 
-/* Panels */
 .step-panel{display:none}
 .step-panel.active{display:block;animation:fadeUp .3s ease}
 
 /* Form */
-.form-group{margin-bottom:16px}
-label{
-  display:block;font-size:12px;font-weight:600;
-  letter-spacing:.06em;text-transform:uppercase;
-  color:var(--text-muted);margin-bottom:7px;
-}
-.field-input{
-  width:100%;background:var(--bg-overlay);
-  border:1.5px solid var(--border-subtle);
-  border-radius:var(--radius-sm);padding:12px 15px;
-  color:var(--text-primary);font-family:var(--font-body);
-  font-size:15px;outline:none;
-  transition:var(--transition-fast);-webkit-appearance:none;
-}
+.form-group{margin-bottom:15px}
+label{display:block;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px}
+.field-input{width:100%;background:var(--bg-overlay);border:1.5px solid var(--border-subtle);border-radius:var(--radius-sm);padding:12px 15px;color:var(--text-primary);font-family:var(--font-body);font-size:15px;outline:none;transition:var(--transition-fast);-webkit-appearance:none}
 .field-input:focus{border-color:var(--blue-border);box-shadow:0 0 0 3px var(--blue-dim)}
 .field-note{font-size:11px;color:var(--text-muted);margin-top:5px}
 
-.btn-primary{
-  width:100%;padding:14px;
-  background:var(--blue);color:#0D1117;
-  border:none;border-radius:var(--radius-md);
-  font-family:var(--font-display);font-size:20px;letter-spacing:2px;
-  cursor:pointer;transition:var(--transition-base);
-  position:relative;overflow:hidden;
-}
+.btn-primary{width:100%;padding:14px;background:var(--blue);color:#0D1117;border:none;border-radius:var(--radius-md);font-family:var(--font-display);font-size:20px;letter-spacing:2px;cursor:pointer;transition:var(--transition-base);position:relative;overflow:hidden}
 .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:var(--shadow-blue)}
 .btn-primary:disabled{opacity:.5;cursor:not-allowed}
-.btn-ghost{
-  width:100%;padding:12px;background:transparent;
-  border:1.5px solid var(--border-subtle);
-  border-radius:var(--radius-md);color:var(--text-muted);
-  font-family:var(--font-body);font-size:14px;
-  cursor:pointer;transition:var(--transition-fast);margin-top:10px;
-}
+.btn-ghost{width:100%;padding:12px;background:transparent;border:1.5px solid var(--border-subtle);border-radius:var(--radius-md);color:var(--text-muted);font-family:var(--font-body);font-size:14px;cursor:pointer;transition:var(--transition-fast);margin-top:10px}
 .btn-ghost:hover{border-color:var(--border-default);color:var(--text-primary)}
-
-.login-link{text-align:center;font-size:13px;color:var(--text-muted);margin-top:18px}
+.login-link{text-align:center;font-size:13px;color:var(--text-muted);margin-top:16px}
 .login-link a{color:var(--blue);text-decoration:none;font-weight:600}
 
-/* ── AVATAR BUILDER ─────────────────────────────────────── */
-.avatar-step-label{
-  text-align:center;font-size:13px;color:var(--text-secondary);
-  margin-bottom:14px;line-height:1.5;
+/* ── AVATAR BUILDER ───────────────────────────────── */
+/* Fixed avatar preview at top */
+.avatar-fixed-preview{
+  display:flex;flex-direction:column;align-items:center;
+  margin-bottom:16px;
+}
+.avatar-fixed-img{
+  width:90px;height:90px;border-radius:50%;
+  border:3px solid var(--blue-border);
+  box-shadow:0 0 24px var(--blue-dim);
+  transition:all .3s ease;
+  background:var(--bg-overlay);
+}
+.avatar-fixed-label{
+  font-size:11px;color:var(--text-muted);
+  margin-top:6px;text-align:center;
 }
 
-/* Gender selection */
-.gender-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px}
-.gender-btn{
-  padding:16px 8px;
-  border:1.5px solid var(--border-subtle);
-  border-radius:var(--radius-lg);
-  background:var(--bg-overlay);
-  cursor:pointer;text-align:center;
-  transition:var(--transition-base);
-  display:flex;flex-direction:column;align-items:center;gap:8px;
-}
+/* Slides container */
+.slides-wrap{position:relative;overflow:hidden}
+.slide{display:none;animation:slideIn .3s ease}
+.slide.active{display:block}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* Slide header */
+.slide-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.slide-title{font-size:13px;font-weight:700;color:var(--text-primary)}
+.slide-counter{font-size:11px;color:var(--text-muted);font-family:var(--font-mono)}
+
+/* Slide progress dots */
+.slide-dots{display:flex;gap:5px;justify-content:center;margin-bottom:14px}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--border-subtle);transition:all .2s}
+.sdot.active{background:var(--blue);width:18px;border-radius:3px}
+.sdot.done{background:var(--green)}
+
+/* Gender cards */
+.gender-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gender-btn{padding:16px 8px;border:1.5px solid var(--border-subtle);border-radius:var(--radius-lg);background:var(--bg-overlay);cursor:pointer;text-align:center;transition:var(--transition-base);display:flex;flex-direction:column;align-items:center;gap:8px}
 .gender-btn:hover{border-color:var(--border-default)}
 .gender-btn.active{border-color:var(--blue);background:var(--blue-dim)}
-.gender-btn img{width:70px;height:70px;border-radius:50%;border:2px solid var(--border-subtle)}
+.gender-btn img{width:68px;height:68px;border-radius:50%;border:2px solid var(--border-subtle)}
 .gender-btn.active img{border-color:var(--blue-border)}
 .gender-label{font-size:14px;font-weight:700;color:var(--text-secondary)}
 .gender-btn.active .gender-label{color:var(--blue)}
 
-/* Avatar customizer */
-.avatar-customizer{display:none}
-.avatar-customizer.show{display:block}
-
-.avatar-preview-wrap{
-  display:flex;flex-direction:column;align-items:center;
-  margin-bottom:16px;
-}
-.avatar-preview-wrap img{
-  width:100px;height:100px;border-radius:50%;
-  border:3px solid var(--blue-border);
-  box-shadow:0 0 20px var(--blue-dim);
-  margin-bottom:8px;
-}
-.avatar-preview-label{font-size:11px;color:var(--text-muted);text-align:center}
-
-.av-section{margin-bottom:12px}
-.av-section-title{
-  font-size:11px;font-weight:700;text-transform:uppercase;
-  letter-spacing:.07em;color:var(--text-muted);margin-bottom:7px;
-}
-.av-opts{display:flex;flex-wrap:wrap;gap:5px}
-.av-opt{
-  padding:4px 10px;
-  border:1px solid var(--border-subtle);
-  border-radius:var(--radius-full);
-  background:var(--bg-overlay);
-  cursor:pointer;font-size:12px;
-  color:var(--text-secondary);
-  transition:var(--transition-fast);white-space:nowrap;
-}
+/* Option buttons */
+.av-opts{display:flex;flex-wrap:wrap;gap:6px}
+.av-opt{padding:5px 11px;border:1px solid var(--border-subtle);border-radius:var(--radius-full);background:var(--bg-overlay);cursor:pointer;font-size:12px;color:var(--text-secondary);transition:var(--transition-fast);white-space:nowrap}
 .av-opt:hover:not(.active){background:var(--bg-surface);border-color:var(--border-default)}
 .av-opt.active{border-color:var(--blue-border);background:var(--blue-dim);color:var(--blue);font-weight:600}
 
-/* Color dots */
-.av-colors{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
-.av-color{
-  width:24px;height:24px;border-radius:50%;
-  cursor:pointer;border:2px solid transparent;
-  transition:all .15s;flex-shrink:0;
-}
+/* Color palette */
+.av-colors{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.av-color{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;flex-shrink:0}
 .av-color:hover{transform:scale(1.15)}
 .av-color.active{border-color:var(--text-primary);transform:scale(1.2)}
 
-.change-gender-btn{
-  display:inline-flex;align-items:center;gap:5px;
-  font-size:12px;color:var(--text-muted);background:none;
-  border:none;cursor:pointer;padding:0;margin-bottom:12px;
-  transition:color .15s;
-}
-.change-gender-btn:hover{color:var(--blue)}
+/* Nav buttons */
+.slide-nav{display:flex;gap:10px;margin-top:16px}
+.btn-prev{flex:1;padding:11px;background:transparent;border:1.5px solid var(--border-subtle);border-radius:var(--radius-md);color:var(--text-muted);font-family:var(--font-body);font-size:13px;cursor:pointer;transition:var(--transition-fast)}
+.btn-prev:hover{border-color:var(--border-default);color:var(--text-primary)}
+.btn-next{flex:2;padding:11px;background:var(--blue);color:#0D1117;border:none;border-radius:var(--radius-md);font-family:var(--font-display);font-size:18px;letter-spacing:2px;cursor:pointer;transition:var(--transition-base)}
+.btn-next:hover{box-shadow:var(--shadow-blue);transform:translateY(-1px)}
+.btn-next:disabled{opacity:.4;cursor:not-allowed;transform:none}
 
 /* Success */
 .success-content{text-align:center}
-.success-icon{font-size:60px;margin-bottom:14px;display:block;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
-.success-content h2{font-family:var(--font-display);font-size:32px;letter-spacing:2px;color:var(--text-primary);margin-bottom:6px}
-.success-content p{color:var(--text-muted);font-size:14px;margin-bottom:20px}
-
-.warning-box{
-  background:var(--red-dim);border:1px solid var(--red-border);
-  border-radius:var(--radius-sm);padding:11px 14px;
-  font-size:12px;color:var(--red);margin-bottom:16px;text-align:left;
-}
-.credentials-box{
-  background:var(--bg-elevated);border:1px solid var(--border-default);
-  border-radius:var(--radius-lg);padding:16px;margin-bottom:18px;text-align:left;
-}
-.cred-row{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:9px 0;border-bottom:1px solid var(--border-subtle);
-}
+.success-icon{font-size:58px;margin-bottom:12px;display:block;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+.success-content h2{font-family:var(--font-display);font-size:30px;letter-spacing:2px;color:var(--text-primary);margin-bottom:5px}
+.success-content p{color:var(--text-muted);font-size:13px;margin-bottom:18px}
+.warning-box{background:var(--red-dim);border:1px solid var(--red-border);border-radius:var(--radius-sm);padding:10px 13px;font-size:12px;color:var(--red);margin-bottom:14px;text-align:left}
+.credentials-box{background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:14px;margin-bottom:16px;text-align:left}
+.cred-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-subtle)}
 .cred-row:last-child{border-bottom:none}
 .cred-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
-.cred-value{font-family:var(--font-mono);font-size:17px;font-weight:700;color:var(--blue);letter-spacing:3px}
-.copy-btn{
-  background:var(--blue-dim);border:1px solid var(--blue-border);
-  border-radius:var(--radius-sm);padding:3px 9px;
-  font-size:11px;color:var(--blue);cursor:pointer;transition:var(--transition-fast);
-}
+.cred-value{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--blue);letter-spacing:3px}
+.copy-btn{background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:var(--radius-sm);padding:3px 9px;font-size:11px;color:var(--blue);cursor:pointer;transition:var(--transition-fast)}
 .copy-btn:hover{background:rgba(56,189,248,0.2)}
 
-@media(max-width:480px){
-  .card{padding:26px 18px}
-  .logo h1{font-size:38px}
-}
+@media(max-width:480px){.card{padding:24px 16px}.logo h1{font-size:36px}}
 </style>
 </head>
 <body>
@@ -230,7 +145,6 @@ label{
     <p>Your English journey starts here</p>
   </div>
 
-  <!-- Steps -->
   <div class="steps" id="stepsBar">
     <div class="step-dot active" id="dot1">1</div>
     <div class="step-line" id="line1"></div>
@@ -239,7 +153,7 @@ label{
     <div class="step-dot" id="dot3">3</div>
   </div>
 
-  <!-- ── STEP 1: Basic Info ─────────────────────────────── -->
+  <!-- STEP 1: Basic Info -->
   <div class="step-panel active" id="step1">
     <div class="form-group">
       <label>Full Name</label>
@@ -257,56 +171,44 @@ label{
     <button class="btn-primary" onclick="goStep2()">CONTINUE →</button>
   </div>
 
-  <!-- ── STEP 2: Avatar Builder ─────────────────────────── -->
+  <!-- STEP 2: Avatar Builder (Slides) -->
   <div class="step-panel" id="step2">
-    <div class="avatar-step-label" id="avatarStepLabel">
-      اختار جنسك عشان نبدأ نصمم الأفاتار بتاعك 🎨
+
+    <!-- Fixed avatar preview — always visible -->
+    <div class="avatar-fixed-preview">
+      <img id="mainAvatar" class="avatar-fixed-img" src="" alt="Your Avatar">
+      <div class="avatar-fixed-label">Live preview — updates as you customize</div>
     </div>
 
-    <!-- Gender selection -->
-    <div class="gender-row" id="genderRow">
-      <div class="gender-btn" id="btn-male" onclick="selectGender('male')">
-        <img id="prev-male" src="" alt="ولد">
-        <span class="gender-label">👦 ولد</span>
-      </div>
-      <div class="gender-btn" id="btn-female" onclick="selectGender('female')">
-        <img id="prev-female" src="" alt="بنت">
-        <span class="gender-label">👧 بنت</span>
-      </div>
+    <!-- Slide progress dots -->
+    <div class="slide-dots" id="slideDots"></div>
+
+    <!-- Slides container -->
+    <div class="slides-wrap" id="slidesWrap"></div>
+
+    <!-- Navigation -->
+    <div class="slide-nav">
+      <button class="btn-prev" id="btnPrev" onclick="prevSlide()">← Back</button>
+      <button class="btn-next" id="btnNext" onclick="nextSlide()">NEXT →</button>
     </div>
 
-    <!-- Customizer (shown after gender pick) -->
-    <div class="avatar-customizer" id="avatarCustomizer">
-      <button class="change-gender-btn" onclick="changeGender()">← تغيير الجنس</button>
-
-      <div class="avatar-preview-wrap">
-        <img id="mainAvatar" src="" alt="الأفاتار بتاعك">
-        <div class="avatar-preview-label">تغيير لايف — الأفاتار بيتحدث فور اختيارك</div>
-      </div>
-
-      <div id="optionsWrap"></div>
-    </div>
-
-    <div style="display:flex;gap:10px;margin-top:16px">
-      <button class="btn-ghost" onclick="goStep1()" style="margin-top:0;flex:1">← BACK</button>
-      <button class="btn-primary" onclick="goStep3()" style="flex:2" id="step2NextBtn">JOIN NOW 🚀</button>
-    </div>
+    <button class="btn-ghost" onclick="goStep1()">← Back to Info</button>
   </div>
 
-  <!-- ── STEP 3: Success ────────────────────────────────── -->
+  <!-- STEP 3: Success -->
   <div class="step-panel" id="step3">
     <div class="success-content">
       <span class="success-icon">🏆</span>
       <h2>WELCOME!</h2>
-      <p>Your account has been created. Save your credentials — you'll need them to log in.</p>
+      <p>Your account has been created. Save your credentials now!</p>
 
-      <div class="warning-box">
-        ⚠️ <strong>Important:</strong> Screenshot or write down your Code and Passkey now.
+      <div style="display:flex;justify-content:center;margin-bottom:14px">
+        <img id="successAvatar" src=""
+          style="width:80px;height:80px;border-radius:50%;border:3px solid var(--blue-border);box-shadow:0 0 20px var(--blue-dim)">
       </div>
 
-      <div style="display:flex;justify-content:center;margin-bottom:16px">
-        <img id="successAvatar" src="" alt="أفاتارك"
-          style="width:90px;height:90px;border-radius:50%;border:3px solid var(--blue-border);box-shadow:0 0 20px var(--blue-dim)">
+      <div class="warning-box">
+        ⚠️ <strong>Important:</strong> Screenshot your Code and Passkey — they won't be shown again.
       </div>
 
       <div class="credentials-box">
@@ -323,7 +225,6 @@ label{
           <div class="cred-value" id="credTrial" style="font-size:13px;letter-spacing:1px">——</div></div>
         </div>
       </div>
-
       <button class="btn-primary" onclick="goToDashboard()">START COMPETING 🔥</button>
     </div>
   </div>
@@ -334,263 +235,120 @@ label{
 </div>
 
 <script>
-// ── Avataaars Config ──────────────────────────────────────
+// ── Avataaars ─────────────────────────────────────────────
 const AVATAR_BASE = 'https://avataaars.io/';
 
-const SKIN_COLORS = {
-  Tanned:'#FD9841', Yellow:'#F8D25C', Pale:'#FFDBB4',
-  Light:'#EDB98A', Brown:'#D08B5B', DarkBrown:'#AE5D29', Black:'#614335'
-};
-const HAIR_COLORS = {
-  Auburn:'#A55728', Black:'#2C1B18', Blonde:'#B58143', BlondeGolden:'#D6B370',
-  Brown:'#724133', BrownDark:'#4A312C', PastelPink:'#F59797',
-  Platinum:'#EEEEEE', Red:'#C93305', SilverGray:'#E8E1E1'
-};
-const CLOTHE_COLORS = {
-  Black:'#262E33', Blue01:'#65C9FF', Blue02:'#81D2FF', Blue03:'#677EEE',
-  Gray01:'#B7C1BE', Gray02:'#929598', Heather:'#718AC1',
-  PastelBlue:'#AEB1FF', PastelGreen:'#A7FFC4', PastelYellow:'#FFDF89',
-  Pink:'#FF488E', Red:'#FF5C5C', White:'#FFFFFF'
-};
+const SKIN_COLORS  = {Tanned:'#FD9841',Yellow:'#F8D25C',Pale:'#FFDBB4',Light:'#EDB98A',Brown:'#D08B5B',DarkBrown:'#AE5D29',Black:'#614335'};
+const HAIR_COLORS  = {Auburn:'#A55728',Black:'#2C1B18',Blonde:'#B58143',BlondeGolden:'#D6B370',Brown:'#724133',BrownDark:'#4A312C',PastelPink:'#F59797',Platinum:'#EEEEEE',Red:'#C93305',SilverGray:'#E8E1E1'};
+const CLOTHE_COLORS= {Black:'#262E33',Blue01:'#65C9FF',Blue02:'#81D2FF',Blue03:'#677EEE',Gray01:'#B7C1BE',Gray02:'#929598',Heather:'#718AC1',PastelBlue:'#AEB1FF',PastelGreen:'#A7FFC4',PastelYellow:'#FFDF89',Pink:'#FF488E',Red:'#FF5C5C',White:'#FFFFFF'};
 
-const OPTIONS = {
-  male: [
-    { key:'topType', label:'الشعر',
-      values:['ShortHairShortFlat','ShortHairShortRound','ShortHairShortWaved','ShortHairSidePart',
-              'ShortHairDreads01','ShortHairDreads02','ShortHairFrizzle','LongHairBun',
-              'NoHair','Hat','WinterHat1','WinterHat2','Turban','Eyepatch'],
-      labels:['مسطح','مستدير','موجي','جانبي','دريدز 1','دريدز 2','مجعد','كعكة',
-              'بدون شعر','قبعة','قبعة شتوي 1','قبعة شتوي 2','عمامة','رباطة عين'],
-      colorKey:'hairColor' },
-    { key:'facialHairType', label:'شعر الوجه',
-      values:['Blank','BeardLight','BeardMajestic','BeardMedium','MoustacheFancy','MoustacheMagnum'],
-      labels:['بدون','لحية خفيفة','لحية ملكية','لحية متوسطة','شنب أنيق','شنب ضخم'],
-      colorKey:'facialHairColor' },
-    { key:'accessoriesType', label:'إكسسوارات',
-      values:['Blank','Kurt','Prescription01','Prescription02','Round','Sunglasses','Wayfarers'],
-      labels:['بدون','كيرت','نظارة 1','نظارة 2','دائري','شمسية','ويفيرز'] },
-    { key:'clotheType', label:'الملابس',
-      values:['BlazerShirt','BlazerSweater','CollarSweater','GraphicShirt','Hoodie','Overall','ShirtCrewNeck','ShirtScoopNeck','ShirtVNeck'],
-      labels:['بليزر وقميص','بليزر وسويتر','سويتر ياقة','تيشيرت مطبوع','هودي','أوفرول','تيشيرت مستدير','تيشيرت سكوب','تيشيرت V'],
-      colorKey:'clotheColor' },
-    { key:'eyeType', label:'العيون',
-      values:['Close','Cry','Default','Dizzy','EyeRoll','Happy','Hearts','Side','Squint','Surprised','Wink','WinkWacky'],
-      labels:['مغمضة','تبكي','عادي','دوار','دوران','سعيدة','قلوب','جانبي','ضيقة','متفاجئة','غمزة','غمزة مجنونة'] },
-    { key:'eyebrowType', label:'الحواجب',
-      values:['Angry','AngryNatural','Default','DefaultNatural','FlatNatural','RaisedExcited','SadConcerned','UnibrowNatural','UpDown'],
-      labels:['غاضب','غاضب طبيعي','عادي','عادي طبيعي','مسطح','مرفوع','حزين','حاجب واحد','أعلى وأسفل'] },
-    { key:'mouthType', label:'الفم',
-      values:['Concerned','Default','Disbelief','Eating','Grimace','Sad','ScreamOpen','Serious','Smile','Tongue','Twinkle'],
-      labels:['قلق','عادي','لا مصداقية','آكل','تقطيب','حزين','صارخ','جاد','مبتسم','لسان','لامع'] },
-    { key:'skinColor', label:'لون البشرة', isColor:true, palette:SKIN_COLORS }
-  ],
-  female: [
-    { key:'topType', label:'الشعر / الغطاء',
-      values:['LongHairBigHair','LongHairBob','LongHairBun','LongHairCurly','LongHairCurvy',
-              'LongHairDreads','LongHairFrida','LongHairFro','LongHairFroBand',
-              'LongHairNotTooLong','LongHairShavedSides','LongHairMiaWallace',
-              'LongHairStraight','LongHairStraight2','LongHairStraightStrand',
-              'ShortHairShortFlat','ShortHairShortRound','ShortHairDreads01',
-              'Hijab','Turban','WinterHat1','WinterHat2','WinterHat3','WinterHat4'],
-      labels:['شعر كبير','بوب','كعكة','مجعد','متموج',
-              'دريدز','فريدا','أفرو','أفرو بند',
-              'طويل عادي','جانبي محلوق','ميا والاس',
-              'مستقيم','مستقيم 2','خصلات',
-              'قصير مسطح','قصير مستدير','قصير دريدز',
-              'حجاب 🧕','عمامة','قبعة شتوي 1','قبعة شتوي 2','قبعة شتوي 3','قبعة شتوي 4'],
-      colorKey:'hairColor' },
-    { key:'accessoriesType', label:'إكسسوارات',
-      values:['Blank','Kurt','Prescription01','Prescription02','Round','Sunglasses','Wayfarers'],
-      labels:['بدون','كيرت','نظارة 1','نظارة 2','دائري','شمسية','ويفيرز'] },
-    { key:'clotheType', label:'الملابس',
-      values:['BlazerShirt','BlazerSweater','CollarSweater','GraphicShirt','Hoodie','Overall','ShirtCrewNeck','ShirtScoopNeck','ShirtVNeck'],
-      labels:['بليزر وقميص','بليزر وسويتر','سويتر ياقة','تيشيرت مطبوع','هودي','أوفرول','تيشيرت مستدير','تيشيرت سكوب','تيشيرت V'],
-      colorKey:'clotheColor' },
-    { key:'eyeType', label:'العيون',
-      values:['Close','Cry','Default','Dizzy','EyeRoll','Happy','Hearts','Side','Squint','Surprised','Wink','WinkWacky'],
-      labels:['مغمضة','تبكي','عادي','دوار','دوران','سعيدة','قلوب','جانبي','ضيقة','متفاجئة','غمزة','غمزة مجنونة'] },
-    { key:'eyebrowType', label:'الحواجب',
-      values:['Angry','AngryNatural','Default','DefaultNatural','FlatNatural','RaisedExcited','SadConcerned','UnibrowNatural','UpDown'],
-      labels:['غاضب','غاضب طبيعي','عادي','عادي طبيعي','مسطح','مرفوع','حزين','حاجب واحد','أعلى وأسفل'] },
-    { key:'mouthType', label:'الفم',
-      values:['Concerned','Default','Disbelief','Eating','Grimace','Sad','ScreamOpen','Serious','Smile','Tongue','Twinkle'],
-      labels:['قلق','عادي','لا مصداقية','آكل','تقطيب','حزين','صارخ','جاد','مبتسم','لسان','لامع'] },
-    { key:'skinColor', label:'لون البشرة', isColor:true, palette:SKIN_COLORS }
-  ]
-};
+// Slides definition — English only
+const SLIDES_MALE = [
+  { id:'gender',   title:'Who are you?',       type:'gender' },
+  { id:'topType',  title:'Hair Style',          type:'opts',
+    values:['ShortHairShortFlat','ShortHairShortRound','ShortHairShortWaved','ShortHairSidePart','ShortHairDreads01','ShortHairDreads02','ShortHairFrizzle','LongHairBun','NoHair','Hat','WinterHat1','WinterHat2','Turban','Eyepatch'],
+    labels:['Flat','Round','Wavy','Side Part','Dreads 1','Dreads 2','Frizzy','Bun','No Hair','Cap','Winter Hat 1','Winter Hat 2','Turban','Eye Patch'],
+    colorKey:'hairColor', colorLabel:'Hair Color', colorPalette:'hair',
+    noColorValues:['NoHair','Hat','WinterHat1','WinterHat2','Turban','Eyepatch'] },
+  { id:'facialHairType', title:'Facial Hair',  type:'opts',
+    values:['Blank','BeardLight','BeardMajestic','BeardMedium','MoustacheFancy','MoustacheMagnum'],
+    labels:['None','Light Beard','Full Beard','Medium Beard','Fancy Moustache','Big Moustache'],
+    colorKey:'facialHairColor', colorLabel:'Beard Color', colorPalette:'hair',
+    noColorValues:['Blank'] },
+  { id:'accessoriesType', title:'Accessories', type:'opts',
+    values:['Blank','Kurt','Prescription01','Prescription02','Round','Sunglasses','Wayfarers'],
+    labels:['None','Kurt','Glasses 1','Glasses 2','Round','Sunglasses','Wayfarers'] },
+  { id:'clotheType', title:'Outfit',           type:'opts',
+    values:['BlazerShirt','BlazerSweater','CollarSweater','GraphicShirt','Hoodie','Overall','ShirtCrewNeck','ShirtScoopNeck','ShirtVNeck'],
+    labels:['Blazer + Shirt','Blazer + Sweater','Collar Sweater','Graphic Tee','Hoodie','Overall','Crew Neck','Scoop Neck','V-Neck'],
+    colorKey:'clotheColor', colorLabel:'Outfit Color', colorPalette:'clothe' },
+  { id:'eyeType',    title:'Eyes',              type:'opts',
+    values:['Close','Cry','Default','Dizzy','EyeRoll','Happy','Hearts','Side','Squint','Surprised','Wink','WinkWacky'],
+    labels:['Closed','Crying','Default','Dizzy','Rolling','Happy','Hearts','Side','Squint','Surprised','Wink','Wacky Wink'] },
+  { id:'eyebrowType', title:'Eyebrows',         type:'opts',
+    values:['Angry','AngryNatural','Default','DefaultNatural','FlatNatural','RaisedExcited','SadConcerned','UnibrowNatural','UpDown'],
+    labels:['Angry','Angry Natural','Default','Default Natural','Flat','Raised','Sad','Unibrow','Up & Down'] },
+  { id:'mouthType',  title:'Mouth',             type:'opts',
+    values:['Concerned','Default','Disbelief','Eating','Grimace','Sad','ScreamOpen','Serious','Smile','Tongue','Twinkle'],
+    labels:['Concerned','Default','Disbelief','Eating','Grimace','Sad','Screaming','Serious','Smile','Tongue Out','Twinkle'] },
+  { id:'skinColor',  title:'Skin Tone',         type:'color', colorPalette:'skin' }
+];
+
+const SLIDES_FEMALE = [
+  { id:'gender',   title:'Who are you?',        type:'gender' },
+  { id:'topType',  title:'Hair / Head Cover',   type:'opts',
+    values:['LongHairBigHair','LongHairBob','LongHairBun','LongHairCurly','LongHairCurvy','LongHairDreads','LongHairFrida','LongHairFro','LongHairFroBand','LongHairNotTooLong','LongHairShavedSides','LongHairMiaWallace','LongHairStraight','LongHairStraight2','LongHairStraightStrand','ShortHairShortFlat','ShortHairShortRound','ShortHairDreads01','Hijab','Turban','WinterHat1','WinterHat2','WinterHat3','WinterHat4'],
+    labels:['Big Hair','Bob','Bun','Curly','Wavy','Dreads','Frida','Afro','Afro Band','Not Too Long','Shaved Sides','Mia Wallace','Straight','Straight 2','Straight Strand','Short Flat','Short Round','Short Dreads','Hijab 🧕','Turban','Winter Hat 1','Winter Hat 2','Winter Hat 3','Winter Hat 4'],
+    colorKey:'hairColor', colorLabel:'Hair Color', colorPalette:'hair',
+    noColorValues:['Hijab','Turban','WinterHat1','WinterHat2','WinterHat3','WinterHat4'] },
+  { id:'accessoriesType', title:'Accessories',  type:'opts',
+    values:['Blank','Kurt','Prescription01','Prescription02','Round','Sunglasses','Wayfarers'],
+    labels:['None','Kurt','Glasses 1','Glasses 2','Round','Sunglasses','Wayfarers'] },
+  { id:'clotheType', title:'Outfit',            type:'opts',
+    values:['BlazerShirt','BlazerSweater','CollarSweater','GraphicShirt','Hoodie','Overall','ShirtCrewNeck','ShirtScoopNeck','ShirtVNeck'],
+    labels:['Blazer + Shirt','Blazer + Sweater','Collar Sweater','Graphic Tee','Hoodie','Overall','Crew Neck','Scoop Neck','V-Neck'],
+    colorKey:'clotheColor', colorLabel:'Outfit Color', colorPalette:'clothe' },
+  { id:'eyeType',    title:'Eyes',              type:'opts',
+    values:['Close','Cry','Default','Dizzy','EyeRoll','Happy','Hearts','Side','Squint','Surprised','Wink','WinkWacky'],
+    labels:['Closed','Crying','Default','Dizzy','Rolling','Happy','Hearts','Side','Squint','Surprised','Wink','Wacky Wink'] },
+  { id:'eyebrowType', title:'Eyebrows',         type:'opts',
+    values:['Angry','AngryNatural','Default','DefaultNatural','FlatNatural','RaisedExcited','SadConcerned','UnibrowNatural','UpDown'],
+    labels:['Angry','Angry Natural','Default','Default Natural','Flat','Raised','Sad','Unibrow','Up & Down'] },
+  { id:'mouthType',  title:'Mouth',             type:'opts',
+    values:['Concerned','Default','Disbelief','Eating','Grimace','Sad','ScreamOpen','Serious','Smile','Tongue','Twinkle'],
+    labels:['Concerned','Default','Disbelief','Eating','Grimace','Sad','Screaming','Serious','Smile','Tongue Out','Twinkle'] },
+  { id:'skinColor',  title:'Skin Tone',         type:'color', colorPalette:'skin' }
+];
 
 const DEFAULTS = {
-  male:{
-    topType:'ShortHairShortFlat', hairColor:'BrownDark',
-    facialHairType:'Blank', facialHairColor:'BrownDark',
-    accessoriesType:'Blank',
-    clotheType:'Hoodie', clotheColor:'Blue01',
-    eyeType:'Default', eyebrowType:'Default', mouthType:'Smile',
-    skinColor:'Light', hatColor:'Black'
-  },
-  female:{
-    topType:'LongHairStraight', hairColor:'BrownDark',
-    facialHairType:'Blank', facialHairColor:'BrownDark',
-    accessoriesType:'Blank',
-    clotheType:'Hoodie', clotheColor:'PastelBlue',
-    eyeType:'Default', eyebrowType:'Default', mouthType:'Smile',
-    skinColor:'Light', hatColor:'Black'
-  }
+  male:  {topType:'ShortHairShortFlat',hairColor:'BrownDark',facialHairType:'Blank',facialHairColor:'BrownDark',accessoriesType:'Blank',clotheType:'Hoodie',clotheColor:'Blue01',eyeType:'Default',eyebrowType:'Default',mouthType:'Smile',skinColor:'Light',hatColor:'Black'},
+  female:{topType:'LongHairStraight',hairColor:'BrownDark',facialHairType:'Blank',facialHairColor:'BrownDark',accessoriesType:'Blank',clotheType:'Hoodie',clotheColor:'PastelBlue',eyeType:'Default',eyebrowType:'Default',mouthType:'Smile',skinColor:'Light',hatColor:'Black'}
 };
 
 // ── State ─────────────────────────────────────────────────
 let gender    = null;
 let avConfig  = {};
+let slides    = [];
+let curSlide  = 0;
 let avatarURL = '';
 
-function buildAvatarURL(cfg) {
+function buildURL(cfg) {
   const p = new URLSearchParams({
     avatarStyle:'Circle',
-    topType:         cfg.topType         || 'ShortHairShortFlat',
-    accessoriesType: cfg.accessoriesType || 'Blank',
-    hairColor:       cfg.hairColor       || 'BrownDark',
-    facialHairType:  cfg.facialHairType  || 'Blank',
-    facialHairColor: cfg.facialHairColor || 'BrownDark',
-    clotheType:      cfg.clotheType      || 'Hoodie',
-    clotheColor:     cfg.clotheColor     || 'Blue01',
-    eyeType:         cfg.eyeType         || 'Default',
-    eyebrowType:     cfg.eyebrowType     || 'Default',
-    mouthType:       cfg.mouthType       || 'Smile',
-    skinColor:       cfg.skinColor       || 'Light',
-    hatColor:        cfg.hatColor        || 'Black'
+    topType:         cfg.topType         ||'ShortHairShortFlat',
+    accessoriesType: cfg.accessoriesType ||'Blank',
+    hairColor:       cfg.hairColor       ||'BrownDark',
+    facialHairType:  cfg.facialHairType  ||'Blank',
+    facialHairColor: cfg.facialHairColor ||'BrownDark',
+    clotheType:      cfg.clotheType      ||'Hoodie',
+    clotheColor:     cfg.clotheColor     ||'Blue01',
+    eyeType:         cfg.eyeType         ||'Default',
+    eyebrowType:     cfg.eyebrowType     ||'Default',
+    mouthType:       cfg.mouthType       ||'Smile',
+    skinColor:       cfg.skinColor       ||'Light',
+    hatColor:        cfg.hatColor        ||'Black'
   });
   return AVATAR_BASE + '?' + p.toString();
 }
 
 function updatePreview() {
-  avatarURL = buildAvatarURL(avConfig);
+  avatarURL = buildURL(avConfig);
   const img = document.getElementById('mainAvatar');
   if (img) img.src = avatarURL;
-}
-
-// ── Gender ─────────────────────────────────────────────────
-function selectGender(g) {
-  gender   = g;
-  avConfig = { ...DEFAULTS[g] };
-
-  document.getElementById('btn-male').classList.toggle('active', g === 'male');
-  document.getElementById('btn-female').classList.toggle('active', g === 'female');
-  document.getElementById('avatarCustomizer').classList.add('show');
-  document.getElementById('avatarStepLabel').textContent = 'خصص الأفاتار بتاعك — التغيير لايف 🎨';
-
-  renderOptions();
-  updatePreview();
-}
-
-function changeGender() {
-  gender = null;
-  document.getElementById('btn-male').classList.remove('active');
-  document.getElementById('btn-female').classList.remove('active');
-  document.getElementById('avatarCustomizer').classList.remove('show');
-  document.getElementById('avatarStepLabel').textContent = 'اختار جنسك عشان نبدأ نصمم الأفاتار بتاعك 🎨';
-}
-
-// ── Render Options ─────────────────────────────────────────
-function renderOptions() {
-  const wrap = document.getElementById('optionsWrap');
-  wrap.innerHTML = '';
-
-  const sections = OPTIONS[gender] || [];
-  sections.forEach(sec => {
-    const div = document.createElement('div');
-    div.className = 'av-section';
-
-    const title = document.createElement('div');
-    title.className = 'av-section-title';
-    title.textContent = sec.label;
-    div.appendChild(title);
-
-    if (sec.isColor) {
-      // Pure color section (skin)
-      div.appendChild(buildColorPalette(sec.key, sec.palette));
-    } else {
-      // Option buttons
-      const opts = document.createElement('div');
-      opts.className = 'av-opts';
-      sec.values.forEach((val, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'av-opt' + (avConfig[sec.key] === val ? ' active' : '');
-        btn.textContent = sec.labels[i];
-        btn.onclick = () => {
-          avConfig[sec.key] = val;
-          // Reset hat color to default when switching
-          if (sec.key === 'topType') avConfig.hatColor = 'Black';
-          renderOptions();
-          updatePreview();
-        };
-        opts.appendChild(btn);
-      });
-      div.appendChild(opts);
-
-      // Color picker for hair / clothe / facialHair
-      if (sec.colorKey === 'hairColor') {
-        const hatTops = ['Hat','WinterHat1','WinterHat2','WinterHat3','WinterHat4','Hijab','Turban','Eyepatch','NoHair'];
-        if (!hatTops.includes(avConfig.topType)) {
-          const clbl = document.createElement('div');
-          clbl.className = 'av-section-title';
-          clbl.style.marginTop = '8px';
-          clbl.textContent = 'لون الشعر';
-          div.appendChild(clbl);
-          div.appendChild(buildColorPalette('hairColor', HAIR_COLORS));
-        }
-      }
-      if (sec.colorKey === 'clotheColor') {
-        const clbl = document.createElement('div');
-        clbl.className = 'av-section-title';
-        clbl.style.marginTop = '8px';
-        clbl.textContent = 'لون الملابس';
-        div.appendChild(clbl);
-        div.appendChild(buildColorPalette('clotheColor', CLOTHE_COLORS));
-      }
-      if (sec.colorKey === 'facialHairColor' && avConfig.facialHairType !== 'Blank') {
-        const clbl = document.createElement('div');
-        clbl.className = 'av-section-title';
-        clbl.style.marginTop = '8px';
-        clbl.textContent = 'لون شعر الوجه';
-        div.appendChild(clbl);
-        div.appendChild(buildColorPalette('facialHairColor', HAIR_COLORS));
-      }
-    }
-
-    wrap.appendChild(div);
-  });
-}
-
-function buildColorPalette(key, palette) {
-  const row = document.createElement('div');
-  row.className = 'av-colors';
-  Object.entries(palette).forEach(([name, hex]) => {
-    const dot = document.createElement('div');
-    dot.className = 'av-color' + (avConfig[key] === name ? ' active' : '');
-    dot.style.background = hex;
-    dot.title = name;
-    dot.onclick = () => {
-      avConfig[key] = name;
-      renderOptions();
-      updatePreview();
-    };
-    row.appendChild(dot);
-  });
-  return row;
 }
 
 // ── Steps ──────────────────────────────────────────────────
 function showStep(n) {
   [1,2,3].forEach(i => {
-    document.getElementById('step'+i).classList.toggle('active', i === n);
+    document.getElementById('step'+i).classList.toggle('active', i===n);
     const dot = document.getElementById('dot'+i);
-    if      (i < n)  { dot.className = 'step-dot done';   dot.textContent = '✓'; }
-    else if (i === n) { dot.className = 'step-dot active'; dot.textContent = i; }
-    else             { dot.className = 'step-dot';         dot.textContent = i; }
+    if      (i < n)  { dot.className='step-dot done';   dot.textContent='✓'; }
+    else if (i===n)  { dot.className='step-dot active'; dot.textContent=i; }
+    else             { dot.className='step-dot';         dot.textContent=i; }
   });
-  document.getElementById('line1').className = 'step-line' + (n > 1 ? ' done' : '');
-  document.getElementById('line2').className = 'step-line' + (n > 2 ? ' done' : '');
-  document.getElementById('loginLinkRow').style.display = n === 3 ? 'none' : 'block';
+  document.getElementById('line1').className = 'step-line'+(n>1?' done':'');
+  document.getElementById('line2').className = 'step-line'+(n>2?' done':'');
+  document.getElementById('loginLinkRow').style.display = n===3?'none':'block';
 }
 
 function goStep1() { showStep(1); }
@@ -599,45 +357,195 @@ function goStep2() {
   const name  = document.getElementById('fullName').value.trim();
   const age   = document.getElementById('age').value;
   const email = document.getElementById('email').value.trim();
-  if (!name)                         return UI.toast('Please enter your full name.', 'error');
-  if (!age || Number(age) < 8)       return UI.toast('Please enter a valid age.', 'error');
-  if (!email || !email.includes('@')) return UI.toast('Please enter a valid email.', 'error');
+  if (!name)                          return UI.toast('Please enter your full name.','error');
+  if (!age || Number(age) < 8)        return UI.toast('Please enter a valid age.','error');
+  if (!email || !email.includes('@')) return UI.toast('Please enter a valid email.','error');
   showStep(2);
+  initSlides();
 }
 
-async function goStep3() {
+// ── Slides ─────────────────────────────────────────────────
+function initSlides() {
+  // Start at gender slide
+  gender   = null;
+  avConfig = {};
+  slides   = SLIDES_MALE; // default — changes after gender pick
+  curSlide = 0;
+
+  // Show default preview
+  document.getElementById('mainAvatar').src =
+    buildURL({...DEFAULTS.male, topType:'ShortHairShortFlat'});
+
+  renderSlide();
+}
+
+function renderSlide() {
+  const sl = slides[curSlide];
+  const wrap = document.getElementById('slidesWrap');
+
+  // Header
+  wrap.innerHTML = `
+    <div class="slide-hdr">
+      <div class="slide-title">${sl.title}</div>
+      <div class="slide-counter">${curSlide+1} / ${slides.length}</div>
+    </div>
+    <div id="slideContent"></div>
+  `;
+
+  // Dots
+  const dotsEl = document.getElementById('slideDots');
+  dotsEl.innerHTML = slides.map((_,i) => {
+    let cls = 'sdot';
+    if (i < curSlide)  cls += ' done';
+    if (i === curSlide) cls += ' active';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+
+  const content = document.getElementById('slideContent');
+
+  if (sl.type === 'gender') {
+    renderGenderSlide(content);
+  } else if (sl.type === 'color') {
+    renderColorOnlySlide(content, sl);
+  } else {
+    renderOptsSlide(content, sl);
+  }
+
+  // Nav buttons
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+
+  btnPrev.style.display = curSlide === 0 ? 'none' : 'block';
+
+  if (curSlide === slides.length - 1) {
+    btnNext.textContent = 'DONE ✓';
+    btnNext.onclick     = finishAvatar;
+  } else {
+    btnNext.textContent = 'NEXT →';
+    btnNext.onclick     = nextSlide;
+  }
+
+  // Disable next on gender slide until picked
+  btnNext.disabled = (sl.type === 'gender' && !gender);
+}
+
+function renderGenderSlide(content) {
+  content.innerHTML = `
+    <div class="gender-row">
+      <div class="gender-btn ${gender==='male'?'active':''}" id="btn-male" onclick="pickGender('male')">
+        <img id="prev-male" src="${buildURL({...DEFAULTS.male})}" alt="Boy">
+        <span class="gender-label">👦 Boy</span>
+      </div>
+      <div class="gender-btn ${gender==='female'?'active':''}" id="btn-female" onclick="pickGender('female')">
+        <img id="prev-female" src="${buildURL({...DEFAULTS.female,topType:'LongHairCurly',clotheColor:'PastelBlue'})}" alt="Girl">
+        <span class="gender-label">👧 Girl</span>
+      </div>
+    </div>`;
+}
+
+function pickGender(g) {
+  gender   = g;
+  avConfig = {...DEFAULTS[g]};
+  slides   = g === 'male' ? SLIDES_MALE : SLIDES_FEMALE;
+  curSlide = 0;
+  updatePreview();
+  renderSlide();
+  document.getElementById('btnNext').disabled = false;
+}
+
+function renderOptsSlide(content, sl) {
+  const current = avConfig[sl.id] || '';
+  let html = `<div class="av-opts">`;
+  sl.values.forEach((v,i) => {
+    html += `<button class="av-opt${current===v?' active':''}" onclick="setOpt('${sl.id}','${v}',this)">${sl.labels[i]}</button>`;
+  });
+  html += `</div>`;
+
+  // Color picker
+  if (sl.colorKey) {
+    const hideColor = sl.noColorValues && sl.noColorValues.includes(avConfig[sl.id]);
+    if (!hideColor) {
+      html += `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin:12px 0 6px">${sl.colorLabel}</div>`;
+      html += buildColorPaletteHTML(sl.colorKey, sl.colorPalette === 'hair' ? HAIR_COLORS : CLOTHE_COLORS);
+    }
+  }
+
+  content.innerHTML = html;
+}
+
+function renderColorOnlySlide(content, sl) {
+  content.innerHTML =
+    `<div style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">Pick your skin tone:</div>` +
+    buildColorPaletteHTML('skinColor', SKIN_COLORS);
+}
+
+function buildColorPaletteHTML(key, palette) {
+  const current = avConfig[key] || '';
+  return `<div class="av-colors">${
+    Object.entries(palette).map(([name,hex]) =>
+      `<div class="av-color${current===name?' active':''}" style="background:${hex}"
+        title="${name}" onclick="setColor('${key}','${name}',this)"></div>`
+    ).join('')
+  }</div>`;
+}
+
+function setOpt(key, val, btn) {
+  avConfig[key] = val;
+  updatePreview();
+  // Re-render current slide to update active state & color visibility
+  renderSlide();
+}
+
+function setColor(key, val, dot) {
+  avConfig[key] = val;
+  updatePreview();
+  // Update dots active state
+  dot.parentElement.querySelectorAll('.av-color').forEach(d => d.classList.remove('active'));
+  dot.classList.add('active');
+}
+
+function nextSlide() {
+  if (curSlide < slides.length - 1) {
+    curSlide++;
+    renderSlide();
+    document.getElementById('slidesWrap').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+}
+
+function prevSlide() {
+  if (curSlide > 0) {
+    curSlide--;
+    renderSlide();
+  }
+}
+
+async function finishAvatar() {
+  if (!gender) { UI.toast('Please select your gender first.','warning'); return; }
+  await registerUser();
+}
+
+// ── Register ───────────────────────────────────────────────
+async function registerUser() {
   const name  = document.getElementById('fullName').value.trim();
   const age   = Number(document.getElementById('age').value);
   const email = document.getElementById('email').value.trim();
+  const url   = avatarURL || buildURL(DEFAULTS[gender || 'male']);
 
-  // Avatar URL — use default male/female if no gender selected
-  if (!gender) {
-    UI.toast('من فضلك اختار الجنس وصمم الأفاتار بتاعك أولاً 😊', 'warning');
-    return;
-  }
-
-  const finalAvatarURL = avatarURL || buildAvatarURL(DEFAULTS[gender]);
-
-  UI.loader(true, 'Creating your account...');
-  const result = await api('register', { full_name:name, age, email, photo_url:finalAvatarURL });
+  UI.loader(true,'Creating your account...');
+  const result = await api('register', { full_name:name, age, email, photo_url:url });
   UI.loader(false);
 
-  if (!result.success) return UI.toast(result.error || 'Registration failed.', 'error');
+  if (!result.success) return UI.toast(result.error||'Registration failed.','error');
 
-  // Save avatar URL to sheet
-  if (result.student_id && finalAvatarURL) {
-    await api('update_photo', { student_id: result.student_id, photo_url: finalAvatarURL });
-    // Auto-approve avatar (it's generated, not uploaded)
-    await api('admin_auto_approve_avatar', {
-      master_key: CONFIG.ADMIN_KEY,
-      student_id: result.student_id
-    });
+  // Save avatar — auto-approved (generated, not uploaded)
+  if (result.student_id) {
+    await api('update_photo', { student_id:result.student_id, photo_url:url });
   }
 
   Auth.save({
     student_id:          result.student_id,
     full_name:           name, age, email,
-    photo_url:           finalAvatarURL,
+    photo_url:           url,
     photo_status:        'approved', // avatar auto-approved
     total_tokens:        0, season_tokens:0, golden_tickets:0,
     subscription_status: 'free', ssr_status:'none',
@@ -645,12 +553,11 @@ async function goStep3() {
     ai_warnings:         0
   });
 
-  // Show success
   document.getElementById('credCode').textContent    = result.code;
   document.getElementById('credPasskey').textContent = result.passkey;
   document.getElementById('credTrial').textContent   =
-    new Date(result.trial_end).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
-  document.getElementById('successAvatar').src = finalAvatarURL;
+    new Date(result.trial_end).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  document.getElementById('successAvatar').src = url;
 
   document.getElementById('stepsBar').style.display = 'none';
   showStep(3);
@@ -664,14 +571,438 @@ function copyText(elId, btn) {
 }
 
 function goToDashboard() { window.location.href = CONFIG.PAGES.DASHBOARD; }
-
-// ── Init: show preview avatars on gender buttons ───────────
-window.addEventListener('load', () => {
-  document.getElementById('prev-male').src =
-    buildAvatarURL(DEFAULTS.male);
-  document.getElementById('prev-female').src =
-    buildAvatarURL({...DEFAULTS.female, topType:'LongHairCurly', clotheColor:'PastelBlue'});
-});
 </script>
+<!-- ============================================================
+  GUIDE WIDGET — paste everything below before </body>
+============================================================ -->
+<style>
+/* ── Floating Button ─────────────────────────────────────── */
+#guideBtn {
+  position: fixed; bottom: 24px; right: 20px;
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--blue, #38BDF8), #7DD3FC);
+  border: none; border-radius: 50%;
+  cursor: pointer; z-index: 999;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 4px 20px rgba(56,189,248,0.45);
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
+  animation: guidePulse 3s ease-in-out infinite;
+}
+@keyframes guidePulse {
+  0%,100% { box-shadow: 0 4px 20px rgba(56,189,248,0.45); }
+  50%      { box-shadow: 0 4px 32px rgba(56,189,248,0.75); }
+}
+#guideBtn:hover { transform: scale(1.12) rotate(-8deg); }
+#guideBtn.open  { transform: rotate(15deg); animation: none; box-shadow: 0 4px 24px rgba(56,189,248,0.5); }
+
+/* Tooltip */
+#guideBtn::after {
+  content: 'المساعد'; position: absolute; right: 64px;
+  background: rgba(13,17,23,0.92); color: #E2E8F0;
+  border: 1px solid rgba(56,189,248,0.2);
+  border-radius: 8px; padding: 5px 10px;
+  font-size: 12px; font-family: 'Cairo', sans-serif;
+  white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity .2s;
+}
+#guideBtn:hover::after { opacity: 1; }
+
+/* ── Chat Window ─────────────────────────────────────────── */
+#guideWindow {
+  position: fixed; bottom: 92px; right: 20px;
+  width: 340px; height: 480px;
+  background: #0D1117;
+  border: 1px solid rgba(56,189,248,0.2);
+  border-radius: 20px;
+  display: flex; flex-direction: column;
+  z-index: 998;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+  transform: scale(0.85) translateY(20px);
+  opacity: 0; pointer-events: none;
+  transition: all .3s cubic-bezier(.34,1.56,.64,1);
+  overflow: hidden;
+}
+#guideWindow.show {
+  transform: scale(1) translateY(0);
+  opacity: 1; pointer-events: all;
+}
+
+/* Header */
+.gw-header {
+  background: linear-gradient(135deg, rgba(56,189,248,0.12), rgba(56,189,248,0.05));
+  border-bottom: 1px solid rgba(56,189,248,0.15);
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.gw-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue,#38BDF8), #7DD3FC);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.gw-info { flex: 1; }
+.gw-name  { font-size: 14px; font-weight: 700; color: #E2E8F0; font-family: 'Cairo', sans-serif; }
+.gw-status{ font-size: 11px; color: #38BDF8; display: flex; align-items: center; gap: 4px; }
+.gw-status .dot { width: 6px; height: 6px; border-radius: 50%; background: #34D399; animation: guidePulse 2s infinite; }
+.gw-close {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  color: #94A3B8; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.gw-close:hover { background: rgba(248,113,113,0.15); color: #F87171; }
+
+/* Gemini button */
+.gw-gemini {
+  margin: 0 12px 0 auto;
+  padding: 4px 10px;
+  background: rgba(167,139,250,0.12);
+  border: 1px solid rgba(167,139,250,0.25);
+  border-radius: 100px;
+  font-size: 11px; font-weight: 700;
+  color: #A78BFA; cursor: pointer;
+  transition: all .15s; white-space: nowrap;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+}
+.gw-gemini:hover { background: rgba(167,139,250,0.22); }
+
+/* Messages */
+.gw-messages {
+  flex: 1; overflow-y: auto; padding: 12px;
+  display: flex; flex-direction: column; gap: 8px;
+  scroll-behavior: smooth;
+}
+.gw-messages::-webkit-scrollbar { width: 4px; }
+.gw-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 100px; }
+
+.msg {
+  max-width: 85%; padding: 9px 13px;
+  border-radius: 14px; font-size: 13px; line-height: 1.55;
+  font-family: 'Cairo', sans-serif;
+  animation: msgIn .25s ease;
+}
+@keyframes msgIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.msg.bot {
+  background: rgba(56,189,248,0.08);
+  border: 1px solid rgba(56,189,248,0.15);
+  color: #E2E8F0; align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+.msg.user {
+  background: rgba(56,189,248,0.18);
+  border: 1px solid rgba(56,189,248,0.3);
+  color: #E2E8F0; align-self: flex-end;
+  border-bottom-right-radius: 4px;
+  text-align: right;
+}
+.msg.loading {
+  background: rgba(56,189,248,0.08);
+  border: 1px solid rgba(56,189,248,0.15);
+  color: #64748B; align-self: flex-start;
+  font-style: italic;
+}
+
+/* Suggestions */
+.gw-suggestions {
+  display: flex; flex-wrap: wrap; gap: 5px;
+  padding: 0 12px 8px;
+}
+.sug-btn {
+  padding: 5px 10px;
+  background: rgba(56,189,248,0.06);
+  border: 1px solid rgba(56,189,248,0.2);
+  border-radius: 100px; font-size: 11px;
+  color: #38BDF8; cursor: pointer;
+  transition: all .15s; font-family: 'Cairo', sans-serif;
+  white-space: nowrap;
+}
+.sug-btn:hover { background: rgba(56,189,248,0.14); }
+
+/* Input */
+.gw-input-row {
+  padding: 10px 12px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; gap: 8px; align-items: center;
+}
+.gw-input {
+  flex: 1; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 100px; padding: 9px 14px;
+  color: #E2E8F0; font-family: 'Cairo', sans-serif;
+  font-size: 13px; outline: none;
+  transition: border-color .15s;
+}
+.gw-input:focus { border-color: rgba(56,189,248,0.35); }
+.gw-input::placeholder { color: #475569; }
+.gw-send {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--blue, #38BDF8); color: #0D1117;
+  border: none; cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s; flex-shrink: 0;
+}
+.gw-send:hover { transform: scale(1.1); box-shadow: 0 4px 12px rgba(56,189,248,0.4); }
+.gw-send:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+/* Mobile */
+@media (max-width: 400px) {
+  #guideWindow { width: calc(100vw - 24px); right: 12px; bottom: 80px; }
+  #guideBtn { bottom: 16px; right: 16px; }
+}
+</style>
+
+<!-- Floating button -->
+<button id="guideBtn" onclick="toggleGuide()" title="المساعد">🤖</button>
+
+<!-- Chat window -->
+<div id="guideWindow">
+  <div class="gw-header">
+    <div class="gw-avatar">🤖</div>
+    <div class="gw-info">
+      <div class="gw-name">روبي — المساعد</div>
+      <div class="gw-status"><div class="dot"></div> متاح دايماً</div>
+    </div>
+    <a class="gw-gemini" id="geminiLink" href="YOUR_GEM_LINK_HERE" target="_blank">✨ Ask Gemini</a>
+    <button class="gw-close" onclick="toggleGuide()">✕</button>
+  </div>
+
+  <div class="gw-messages" id="gwMessages"></div>
+
+  <div class="gw-suggestions" id="gwSuggestions"></div>
+
+  <div class="gw-input-row">
+    <input class="gw-input" id="gwInput" placeholder="اسألني أي حاجة..."
+      onkeydown="if(event.key==='Enter')sendGuide()">
+    <button class="gw-send" id="gwSend" onclick="sendGuide()">➤</button>
+  </div>
+</div>
+
+<!-- Arabic font -->
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+<script>
+// ── Config ────────────────────────────────────────────────
+const GUIDE_SHEET_URL = 'YOUR_GUIDE_APPS_SCRIPT_URL'; // ← هتحطه بعدين
+const GEMINI_GEM_URL  = 'YOUR_GEM_LINK_HERE';         // ← هتحطه بعدين
+
+// ── State ─────────────────────────────────────────────────
+let guideOpen    = false;
+let guideHistory = [];
+let studentName  = '';
+
+// ── Init ──────────────────────────────────────────────────
+(function initGuide() {
+  // Try to get student name from localStorage
+  try {
+    const st = JSON.parse(localStorage.getItem('ss_student'));
+    if (st && st.full_name) studentName = st.full_name.split(' ')[0];
+  } catch(e) {}
+
+  // Update Gemini link
+  document.getElementById('geminiLink').href = GEMINI_GEM_URL;
+
+  // Welcome message
+  const greeting = studentName
+    ? `أهلاً ${studentName}! 👋 أنا روبي، مساعدك في Superstars. اسألني أي حاجة عن البطولة أو الأنشطة.`
+    : 'أهلاً! 👋 أنا روبي، مساعدك في Superstars. اسألني أي حاجة عن البطولة أو الأنشطة.';
+
+  addMsg('bot', greeting);
+  showSuggestions(['إزاي أكسب توكينز؟', 'الأنشطة إيه؟', 'الاشتراك بكام؟', 'إزاي أرفع في الترتيب؟']);
+})();
+
+// ── Toggle ────────────────────────────────────────────────
+function toggleGuide() {
+  guideOpen = !guideOpen;
+  document.getElementById('guideWindow').classList.toggle('show', guideOpen);
+  document.getElementById('guideBtn').classList.toggle('open', guideOpen);
+  if (guideOpen) {
+    setTimeout(() => document.getElementById('gwInput').focus(), 300);
+  }
+}
+
+// ── Messages ──────────────────────────────────────────────
+function addMsg(type, text) {
+  const msgs = document.getElementById('gwMessages');
+  const div  = document.createElement('div');
+  div.className = 'msg ' + type;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function showSuggestions(sugs) {
+  const wrap = document.getElementById('gwSuggestions');
+  wrap.innerHTML = sugs.map(s =>
+    `<button class="sug-btn" onclick="askSuggestion('${s}')">${s}</button>`
+  ).join('');
+}
+
+function askSuggestion(text) {
+  document.getElementById('gwInput').value = text;
+  sendGuide();
+}
+
+// ── Send ──────────────────────────────────────────────────
+async function sendGuide() {
+  const input = document.getElementById('gwInput');
+  const q     = input.value.trim();
+  if (!q) return;
+
+  input.value = '';
+  document.getElementById('gwSend').disabled    = true;
+  document.getElementById('gwSuggestions').innerHTML = '';
+
+  addMsg('user', q);
+  const loadingMsg = addMsg('loading', '🤖 بفكر...');
+
+  guideHistory.push({ role: 'user', text: q });
+
+  try {
+    const result = await searchGuide(q);
+    loadingMsg.remove();
+
+    if (result.found) {
+      addMsg('bot', result.answer);
+      if (result.suggestions && result.suggestions.length) {
+        showSuggestions(result.suggestions);
+      }
+      guideHistory.push({ role: 'bot', text: result.answer });
+    } else {
+      // Not found — suggest Gemini
+      addMsg('bot', result.fallback || 'مش فاهم السؤال ده كويس 🤔 جرب تسأله بطريقة تانية، أو استخدم Gemini وهو هيعرف يساعدك أكتر.');
+      showSuggestions(['إيه الأنشطة المجانية؟', 'ازاي أشتري تذاكر؟', 'إيه هو الـ SSR؟']);
+      document.getElementById('geminiLink').style.background = 'rgba(167,139,250,0.25)';
+      setTimeout(() => document.getElementById('geminiLink').style.background = '', 2000);
+    }
+  } catch(e) {
+    loadingMsg.remove();
+    addMsg('bot', 'فيه مشكلة في الاتصال 😕 جرب تاني أو استخدم Gemini.');
+  }
+
+  document.getElementById('gwSend').disabled = false;
+}
+
+// ── Search Guide Sheet ────────────────────────────────────
+async function searchGuide(question) {
+  // Fallback: local knowledge base if sheet not configured
+  if (!GUIDE_SHEET_URL || GUIDE_SHEET_URL === 'YOUR_GUIDE_APPS_SCRIPT_URL') {
+    return searchLocalKB(question);
+  }
+
+  try {
+    const body = JSON.stringify({ action: 'search_guide', question, student_name: studentName });
+    const url  = GUIDE_SHEET_URL + '?data=' + encodeURIComponent(body);
+    const res  = await fetch(url, { method: 'GET', redirect: 'follow' });
+    const text = await res.text();
+    const s = text.indexOf('{'), e = text.lastIndexOf('}');
+    if (s === -1) throw new Error('Bad response');
+    return JSON.parse(text.slice(s, e + 1));
+  } catch(err) {
+    return searchLocalKB(question);
+  }
+}
+
+// ── Local Knowledge Base (fallback) ──────────────────────
+const LOCAL_KB = [
+  { keywords: ['توكن','توكينز','كسب','اكسب','كيف اكسب'],
+    answer: 'التوكينز بتكسبها بإكمال التاسكات في أي نشاط. كل إجابة صح = توكينز. الأنشطة الصعبة زي Dictation X وSeeds X بتديك توكينز أكتر (90-100 توكن لكل تاسك).',
+    suggestions: ['التذاكر الذهبية إيه؟', 'الأنشطة الأصعب إيه؟'] },
+
+  { keywords: ['تذكرة','تذاكر','ذهبية','golden ticket'],
+    answer: 'التذاكر الذهبية بتكسبها لما توصل لـ milestones معينة. كل 3,000 توكن = تذكرة واحدة. تقدر تصرف 3 تذاكر عشان تفتح كل الأنشطة الـ premium للموسم كله.',
+    suggestions: ['الاشتراك بكام؟', 'ازاي اشتري تذاكر؟'] },
+
+  { keywords: ['اشتراك','اشترك','فلوس','سعر','بكام'],
+    answer: 'الاشتراك في الموسم بيكلف 3 تذاكر ذهبية. لو مش عندك تذاكر كفاية، تقدر تشتريها بفودافون كاش من صفحة الشوب. السعر 40 جنيه لـ 3 تذاكر.',
+    suggestions: ['ازاي اشتري من الشوب؟', 'إيه المجاني؟'] },
+
+  { keywords: ['مجاني','مجانا','بدون فلوس','free'],
+    answer: 'الأنشطة المجانية: Grammar, Alike, Label, Golden Ear, Figurative, Sing Sang Sung. وكمان التاسك الأول في Seeds و Vivid و Dictation و El-Magazine مجاني. وعندك 14 يوم تجربة مجانية بعد التسجيل.',
+    suggestions: ['الاشتراك إيه؟', 'التجربة المجانية كام يوم؟'] },
+
+  { keywords: ['تجربة','trial','14 يوم'],
+    answer: 'بعد التسجيل هتلاقي 14 يوم تجربة مجانية — كل الأنشطة متاحة. التوكينز بتتضاف عادي. بعد انتهاء التجربة بترجع للـ plan المجاني أو تشترك.',
+    suggestions: ['إزاي أشترك؟', 'إيه الأنشطة المجانية؟'] },
+
+  { keywords: ['نشاط','انشطة','الأنشطة','ايه في'],
+    answer: 'فيه 20 نشاط! منهم 10 عاديين و 10 نسخة X للمتقدمين:\n📝 Grammar — 🌱 Seeds — 🖼️ Vivid — 👂 Alike — 🏷️ Label — 👂 Golden Ear — 💬 Figurative — 🎵 Sing Sang Sung — ✍️ Dictation — 🎙️ El-Magazine\nوكلهم موجود بنسخة X بتوكينز أعلى.',
+    suggestions: ['إيه الأنشطة المجانية؟', 'الـ X version إيه؟'] },
+
+  { keywords: ['ترتيب','ليدربورد','تصدر','مرتبة','رانك'],
+    answer: 'الترتيب بيتحسب على أساس التوكينز. فيه ترتيبين — ترتيب الموسم (بيتريسيت كل موسم) وترتيب الكل وقت (مش بيتريسيت). اعمل أكبر عدد ممكن من التاسكات عشان ترفع في الترتيب.',
+    suggestions: ['إزاي أكسب توكينز أكتر؟', 'الموسم امتى بينتهي؟'] },
+
+  { keywords: ['ssr','تقرير','تصحيح','تفاصيل'],
+    answer: 'SSR Reporter خدمة بتوضحلك كل إجابة أعطيتها والإجابة الصح، ولماذا كانت غلط. بتكلف تذكرة واحدة وصالحة للموسم كله.',
+    suggestions: ['إزاي أشتري تذكرة؟'] },
+
+  { keywords: ['ديكتيشن','dictation','كتابة يدوية','صورة'],
+    answer: 'في Dictation بتسمع الـ audio وتكتب اللي سمعته بخطك على ورق، بعدين تصور الورقة وترفعها. الدرجة بتيجي في الـ inbox بعد المراجعة. لازم الصورة تكون واضحة والخط واضح.',
+    suggestions: ['الـ DictationX إيه؟', 'الدرجة امتى بتيجي؟'] },
+
+  { keywords: ['نتيجة','درجة','score','امتى'],
+    answer: 'أغلب الأنشطة نتيجتها فورية. لكن Dictation, El-Magazine, Sing Sang Sung النتيجة بتيجي في الـ Inbox بعد مراجعة الأدمن. شيل Inbox بتاعك كل يوم.',
+    suggestions: ['إزاي أشوف الـ Inbox؟'] },
+
+  { keywords: ['inbox','رسائل','بريد','اشعار'],
+    answer: 'الـ Inbox في الداشبورد. هتلاقي فيه نتايج التاسكات، تحذيرات، رد على الطعون، وكل الإشعارات. بيبان عليه رقم لو فيه رسائل جديدة.',
+    suggestions: ['إزاي أعمل طعن؟'] },
+
+  { keywords: ['ai','ذكاء اصطناعي','chatgpt','copy'],
+    answer: 'ممنوع استخدام AI في أنشطة الكتابة (Seeds, Vivid, Dictation, Sing Sang Sung). النظام بيكتشفه تلقائياً. أول تحذير = صفر توكن. 3 تحذيرات = إيقاف الحساب.',
+    suggestions: ['إيه الأنشطة اللي فيها كتابة؟'] },
+
+  { keywords: ['طعن','appeal','غلط','مش صح'],
+    answer: 'لو حاسس الدرجة غلط، دوس على زرار Appeal بعد النتيجة. اكتب سبب الطعن والأدمن هيراجعه خلال 24 ساعة. لو الطعن اتقبل هيتضاف توكينز.',
+    suggestions: ['النتيجة امتى بتيجي؟'] },
+
+  { keywords: ['فودافون','vodafone','دفع','كاش','شراء'],
+    answer: 'الدفع عن طريق Vodafone Cash. ادخل صفحة الشوب، اختار الباقة، وابعت المبلغ على رقم الفودافون المكتوب. بعدين صوّر الإيصال وابعته على الواتساب مع الكود بتاعك. التذاكر بتتضاف في 30 دقيقة.',
+    suggestions: ['رقم الفودافون إيه؟'] },
+];
+
+function searchLocalKB(question) {
+  const q = question.toLowerCase();
+  let bestMatch = null;
+  let bestScore = 0;
+
+  LOCAL_KB.forEach(entry => {
+    let score = 0;
+    entry.keywords.forEach(kw => {
+      if (q.includes(kw.toLowerCase())) score += 2;
+      else if (kw.toLowerCase().split('').some(c => q.includes(c))) score += 0.5;
+    });
+    if (score > bestScore) { bestScore = score; bestMatch = entry; }
+  });
+
+  if (bestMatch && bestScore >= 2) {
+    return {
+      found: true,
+      answer: bestMatch.answer,
+      suggestions: bestMatch.suggestions || []
+    };
+  }
+
+  // Partial match
+  if (bestMatch && bestScore >= 1) {
+    return {
+      found: true,
+      answer: `مش متأكد 100% بس ممكن تقصد: ${bestMatch.answer}`,
+      suggestions: ['اسألني بطريقة تانية', ...( bestMatch.suggestions || [])]
+    };
+  }
+
+  return {
+    found: false,
+    fallback: `مش فاهم السؤال ده كويس 🤔 جرب تسأل عن: التوكينز، الأنشطة، الاشتراك، الترتيب، أو استخدم Gemini للمساعدة الكاملة.`
+  };
+}
+</script>
+<!-- ============================================================
+  END GUIDE WIDGET
+============================================================ -->
 </body>
 </html>

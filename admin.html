@@ -367,6 +367,15 @@
   .tbl th:nth-child(n+4), .tbl td:nth-child(n+4) { display: none; }
   .links-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ── Global text cut fix ─────────────────────────────────── */
+html, body { min-height: 100%; }
+.main, .page, main {
+  padding-bottom: max(80px, calc(var(--bottom-nav-h, 68px) + 20px)) !important;
+}
+@media (min-width: 769px) {
+  .main, .page, main { padding-bottom: 40px !important; }
+}
 </style>
 </head>
 <body>
